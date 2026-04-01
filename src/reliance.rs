@@ -1,6 +1,6 @@
 use unity::prelude::*;
+use crate::unit::Unit;
 
-use crate::gamedata::unit::Unit;
 #[unity::class("App", "UnitReliance")]
 pub struct UnitReliance {}  // Empty Structure
 

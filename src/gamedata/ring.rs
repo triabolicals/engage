@@ -1,8 +1,9 @@
+use unity::engine::Color;
+use unity::il2cpp::object::Array;
 use unity::prelude::*;
 
 use crate::gamedata::{Gamedata, StructBaseFields, skill::SkillArray};
-use crate::gamedata::person::CapabilitySbyte;
-use crate::gamedata::unit::{Unit, UnitRing};
+use crate::unit::{CapabilitySbyte, Unit};
 
 #[unity::class("App", "RingData")]
 pub struct RingData {
@@ -16,40 +17,25 @@ pub struct RingData {
     pub rank: i32,
     pub icon: &'static Il2CppString,
     pub enhance: &'static mut CapabilitySbyte,
+    equip_sids: Option<&'static Array<&'static Il2CppString>>, // Offset 0x60, Attr: 1
+    equip_skills: &'static SkillArray, // Offset 0x68, Attr: 1
+    is_single_rank: bool, // Offset 0x70, Attr: 1
+    jewel_color_r: u8, // Offset 0x71, Attr: 1
+    jewel_color_g: u8, // Offset 0x72, Attr: 1
+    jewel_color_b: u8, // Offset 0x73, Attr: 1
+    rim_color_r: u8, // Offset 0x74, Attr: 1
+    rim_color_g: u8, // Offset 0x75, Attr: 1
+    rim_color_b: u8, // Offset 0x76, Attr: 1
+    m_group: &'static Il2CppString, // Offset 0x78, Attr: 1
+    m_flag_name: &'static Il2CppString, // Offset 0x80, Attr: 1
+    pub jewel_color: Color, // Offset 0x88, Attr: 1
+    pub rim_color: Color, // Offset 0x98, Attr: 1
 }
 
 impl Gamedata for RingData {}
 
 impl RingData {
-    pub fn get_equip_skills(&self) -> &'static SkillArray { unsafe { ringdata_get_skill_array(self, None)} }
-    pub fn set_equip_skills(&self, value: &SkillArray) { unsafe { ringdata_set_skill_array(self, value, None); } }
-    pub fn get_pool_ring_stock(&self) -> i32 { unsafe { unit_ring_pool_stock_count(self, None)}}
+    #[unity::class_method(23)] pub fn get_equip_skills(&self) -> &'static SkillArray; // Offset: 0x24246F0 Flags: 0
+    #[unity::class_method(24)] pub fn set_equip_skills(&self, value: &SkillArray); // Offset: 0x2424700 Flags: 0
+    pub fn get_pool_ring_stock(&self) -> i32 { crate::unit::UnitRingPool::get_all_stock_count(self) }
 }
-
-pub struct UnitRingPool;
-impl UnitRingPool {
-    pub fn get_ring_stock(ring: &RingData) -> i32 { unsafe { unit_ring_pool_stock_count(ring, None)}}
-    pub fn add_ring(rnid: &Il2CppString, owner: Option<&Unit>, count: i32) {
-        unsafe { add_ring_to_pool(rnid, owner, count, None); }
-    }
-    pub fn sub_ring(rnid: &Il2CppString, owner: Option<&Unit>, count: i32 ) {
-        unsafe { sub_ring_to_pool(rnid, owner, count, None); }
-    }
-}
-
-//Ring
-#[skyline::from_offset(0x024246f0)]
-fn ringdata_get_skill_array(this: &RingData, method_info: OptionalMethod) -> &'static SkillArray;
-
-#[skyline::from_offset(0x2424700)]
-fn ringdata_set_skill_array(this: &RingData, value: &SkillArray, method_info: OptionalMethod);
-
-//UnitRingPool
-#[skyline::from_offset(0x01c5cf40)]
-fn unit_ring_pool_stock_count(data: &RingData, method_info: OptionalMethod) -> i32;
-
-#[skyline::from_offset(0x01c5d420)]
-fn add_ring_to_pool(rnid: &Il2CppString, owner: Option<&Unit>, count: i32, method_info: OptionalMethod) -> &'static UnitRing;
-
-#[skyline::from_offset(0x01c5d5b0)]
-fn sub_ring_to_pool(rnid: &Il2CppString, owner: Option<&Unit>, count: i32, method_info: OptionalMethod);

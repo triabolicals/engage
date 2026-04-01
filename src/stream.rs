@@ -38,6 +38,12 @@ fn stream_write_u8(this: &mut Stream, data: u8, method_info: OptionalMethod);
 #[skyline::from_offset(0x02506610)]
 fn stream_read_u8(this: &mut Stream, method_info: OptionalMethod) -> u8;
 
+#[skyline::from_offset(0x02506840)]
+fn stream_read_u16(this: &mut Stream, method_info: OptionalMethod) -> u16;
+
+#[skyline::from_offset(0x25052c0)]
+fn stream_write_u16(this: &mut Stream, data: u16, method_info: OptionalMethod);
+
 impl Stream {
     pub fn get_position(&self) -> usize {
         self.position as _
@@ -61,6 +67,12 @@ impl Stream {
         if self.buffer.len() >= self.get_position() + 1 {
             unsafe { stream_write_u8(self, data, None) }
             Ok(1)
+        } else { Err(io::Error::from(io::ErrorKind::WriteZero)) }
+    }
+    pub fn write_u16(&mut self, data: u16) -> io::Result<usize> {
+        if self.buffer.len() >= self.get_position() + 2 {
+            unsafe { stream_write_u16(self, data, None) }
+            Ok(2)
         } else { Err(io::Error::from(io::ErrorKind::WriteZero)) }
     }
     pub fn write_i64(&mut self, data: i64) -> io::Result<usize> {
@@ -88,7 +100,11 @@ impl Stream {
         else { Err(io::Error::from(io::ErrorKind::UnexpectedEof)) }
     }
     pub fn read_u8(&mut self) -> io::Result<u8> {
-        if self.buffer.len() >= self.get_position() + 8 { Ok(unsafe { stream_read_u8(self, None) }) }
+        if self.buffer.len() >= self.get_position() + 1 { Ok(unsafe { stream_read_u8(self, None) }) }
+        else { Err(io::Error::from(io::ErrorKind::UnexpectedEof)) }
+    }
+    pub fn read_u16(&mut self) -> io::Result<u16> {
+        if self.buffer.len() >= self.get_position() + 2 { Ok(unsafe { stream_read_u16(self, None) }) }
         else { Err(io::Error::from(io::ErrorKind::UnexpectedEof)) }
     }
     pub fn write_begin(&mut self, version: i32){ unsafe { stream_write_begin(self, version, None); } }

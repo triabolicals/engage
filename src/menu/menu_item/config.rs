@@ -1,20 +1,20 @@
 use unity::prelude::*;
-
 use crate::proc::ProcInst;
-
-use super::{BasicMenu, BasicMenuItemAttribute, BasicMenuResult};
+use crate::menu::{BasicMenu, BasicMenuItemAttribute, BasicMenuResult};
+use crate::menu::menu_item::{MenuItem, MenuItemContent};
 
 pub enum ConfigMenuKind {
     Switch,
     Gauge,
     Command,
 }
+
 #[repr(C)]
 #[unity::class("", "ConfigBasicMenuItem")]
 pub struct ConfigBasicMenuItem {
     // Inlined BasicMenuItem here because C ABI dumb
     pub menu: &'static mut BasicMenu<ConfigBasicMenuItem>,
-    menu_item_content: *const u8,
+    menu_item_content: Option<&'static mut ConfigMenuItemContent>,
     name: &'static Il2CppString,
     pub index: i32,
     full_index: i32,
@@ -30,6 +30,13 @@ pub struct ConfigBasicMenuItem {
     pub is_command_icon: bool,
     pub gauge_ratio: f32,
 }
+impl MenuItem for ConfigBasicMenuItem {}
+
+#[unity::class("", "ConfigMenuItemContent")]
+pub struct ConfigMenuItemContent {}
+
+impl MenuItemContent<ConfigBasicMenuItem> for ConfigBasicMenuItem {}
+
 impl ConfigBasicMenuItem {
     fn new() -> &'static mut ConfigBasicMenuItem {
         let item = il2cpp::instantiate_class(ConfigBasicMenuItem::class().clone()).unwrap();
@@ -172,13 +179,9 @@ impl ConfigBasicMenuItem {
 
         item
     }
-    
-    pub fn update_text(&self) {
-        unsafe {
-            configbasicmenuitem_update_text(self, None);
-        }
-    }
 
+    pub fn update_text(&self) { unsafe { configbasicmenuitem_update_text(self, None); } }
+    
     pub fn change_key_value_b(value: bool) -> bool {
         if unsafe { configbasicmenuitem_change_key_value_int(value as i32, 0, 1, 1, None) } == 1 {
             true
@@ -209,10 +212,10 @@ pub trait ConfigBasicMenuItemSwitchMethods {
     extern "C" fn custom_call(this: &mut ConfigBasicMenuItem, method_info: OptionalMethod) -> BasicMenuResult;
     extern "C" fn set_command_text(this: &mut ConfigBasicMenuItem, method_info: OptionalMethod);
     extern "C" fn set_help_text(this: &mut ConfigBasicMenuItem, method_info: OptionalMethod);
-    extern "C" fn a_call(this: &mut ConfigBasicMenuItem, method_info: OptionalMethod) -> BasicMenuResult {
+    extern "C" fn a_call(_this: &mut ConfigBasicMenuItem, method_info: OptionalMethod) -> BasicMenuResult {
         BasicMenuResult::new()
     }
-    extern "C" fn build_attributes(this: &mut ConfigBasicMenuItem, method_info: OptionalMethod) -> BasicMenuItemAttribute {
+    extern "C" fn build_attributes(_this: &mut ConfigBasicMenuItem, method_info: OptionalMethod) -> BasicMenuItemAttribute {
         BasicMenuItemAttribute::Enable
     }
 }
@@ -229,7 +232,7 @@ pub trait ConfigBasicMenuItemCommandMethods {
         this.is_arrow = false;
         ConfigBasicMenuItem::on_deselect(this);
     }
-    
+
     extern "C" fn on_deselect(this: &mut ConfigBasicMenuItem, _method_info: OptionalMethod) {
         ConfigBasicMenuItem::on_select(this);
         this.is_arrow = false;
@@ -253,7 +256,7 @@ extern "C" fn open_anime_all_ondispose(this: &mut ProcInst, _method_info: Option
 
 pub trait ConfigBasicMenuItemGaugeMethods {
     fn init_content(_this: &mut ConfigBasicMenuItem) { }
-    
+
     extern "C" fn custom_call(this: &mut ConfigBasicMenuItem, method_info: OptionalMethod) -> BasicMenuResult;
     extern "C" fn set_help_text(this: &mut ConfigBasicMenuItem, method_info: OptionalMethod);
     extern "C" fn a_call(this: &mut ConfigBasicMenuItem, method_info: OptionalMethod) -> BasicMenuResult {

@@ -1,6 +1,6 @@
 use unity::{prelude::*, system::{List, Stack}};
-
-use crate::gamedata::{skill::{SkillArray, SkillData}, unit::Unit};
+use crate::gamedata::skill::{SkillArray, SkillData};
+use crate::unit::Unit;
 
 #[unity::class("App", "MapSequenceTargetSelect")]
 pub struct MapSequenceTargetSelect {

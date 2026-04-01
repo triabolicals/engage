@@ -2,10 +2,17 @@
 
 use unity::prelude::*;
 use unity::il2cpp::class::Il2CppRGCTXData;
+use crate::bit::BitField32;
 use crate::singleton::SingletonClass;
 
 #[unity::class("App", "GameUserGlobalData")]
-pub struct GameUserGlobalData {}
+pub struct GameUserGlobalData {
+    parent: [u8; 0x10],
+    pub last_save_data_type: i32,
+    pub last_save_data_index: i32,
+    pub ident_count: u32,
+    pub flag: &'static mut BitField32,
+}
 
 impl GameUserGlobalData {
     pub fn get_instance() -> &'static mut GameUserGlobalData {

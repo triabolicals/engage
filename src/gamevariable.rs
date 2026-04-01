@@ -1,12 +1,15 @@
 //! Methods to interact with the savedata variables.
 
 use unity::prelude::*;
-use unity::system::List;
+use unity::system::{Dictionary, List};
 use crate::gameuserdata::*;
 
 #[repr(C)]
 #[unity::class("App", "GameVariable")]
-pub struct GameVariable { }
+pub struct GameVariable {
+    pub capacity: i32,
+    pub padd: i32,
+}
 
 #[unity::from_offset("App", "GameVariable", "GetBool")]
 pub fn get_bool(this: &GameVariable, key: &Il2CppString, method_info: OptionalMethod) -> bool;

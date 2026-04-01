@@ -1,6 +1,6 @@
 use unity::prelude::*;
-
-use crate::proc::{desc::ProcDesc, ProcInst, ProcInstFields, Bindable};
+use super::*;
+use crate::proc::{desc::ProcDesc, ProcInst};
 
 #[unity::class("App", "HubRefineShopSequence")]
 pub struct HubRefineShopSequence {

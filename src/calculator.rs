@@ -3,9 +3,8 @@ use unity::{prelude::OptionalMethod, system::Il2CppString};
 /// Trait to simulate inheritance for [`CalculatorCommand`].
 /// 
 /// A method expecting a `&impl IsCalculatorCommand` or `<P: IsCalculatorCommand>(parent: &P, ...)` will accept any type that inherits from [`CalculatorCommand`].
-pub trait IsCalculatorCommand {
+pub trait IsCalculatorCommand {}
 
-}
 
 #[unity::class("App", "GameCalculatorCommand")]
 pub struct GameCalculatorCommand {

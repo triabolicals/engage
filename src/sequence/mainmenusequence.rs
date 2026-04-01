@@ -1,7 +1,8 @@
 use unity::prelude::*;
 use num_derive::FromPrimitive;
 use num_derive::ToPrimitive;
-use crate::{proc::{ProcInstFields, Bindable}, singleton::SingletonProcInst};
+use crate::util::get_singleton_proc_instance;
+use super::*;
 
 #[derive(PartialEq, Clone, FromPrimitive, ToPrimitive)]
 pub enum MainMenuSequenceLabel {
@@ -51,29 +52,14 @@ pub struct MainMenuSequence {
 }
 
 impl MainMenuSequence {
-    pub fn get() -> &'static MainMenuSequence {
-        let idk = get_generic_class!(SingletonProcInst<MainMenuSequence>).unwrap();
-
-        let get_instance = unsafe {
-            std::mem::transmute::<_, extern "C" fn(OptionalMethod) -> &'static mut MainMenuSequence>(idk.rgctx_data.get_instance.method_ptr)
-        };
-
-        get_instance(Some(idk.rgctx_data.get_instance))
+    pub const MAIN_MENU_SEQUENCE: i32 = -1912552174;
+    pub fn get_instance() -> Option<&'static mut Self> {
+        get_singleton_proc_instance::<Self>()
     }
-
-    pub fn get_mut() -> &'static mut MainMenuSequence {
-        let idk = get_generic_class!(SingletonProcInst<MainMenuSequence>).unwrap();
-
-        let get_instance = unsafe {
-            std::mem::transmute::<_, extern "C" fn(OptionalMethod) -> &'static mut MainMenuSequence>(idk.rgctx_data.get_instance.method_ptr)
-        };
-
-        get_instance(Some(idk.rgctx_data.get_instance))
-    }
-
     pub fn jump_to_next_sequence() {
-        let instance = Self::get();
-        unsafe { mainmenusequence_jumptonextsequence(instance, None) };
+        if let Some(instance) = Self::get_instance() {
+            unsafe { mainmenusequence_jumptonextsequence(instance, None) };
+        }
     }
 }
 

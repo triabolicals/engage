@@ -1,6 +1,8 @@
 //! Methods to manipulate and query the message system.
 
 use unity::{prelude::*, system::Dictionary};
+use unity::il2cpp::object::Array;
+use crate::resourcemanager::ResourceHandle;
 
 #[repr(C)]
 #[unity::class("App", "Mess")]
@@ -8,32 +10,39 @@ use unity::{prelude::*, system::Dictionary};
 pub struct Mess { }
 
 impl Mess {
-    pub fn get<'a>(label: impl Into<&'a Il2CppString>) -> &'static mut Il2CppString {
-        unsafe { mess_get(label.into(), None) }
-    }
-    pub fn get_item_none() -> &'static mut Il2CppString {
-        unsafe { mess_get("MIID_H_None".into(), None) }
-    }
+    pub fn get<'a>(label: impl Into<&'a Il2CppString>) -> &'static mut Il2CppString { unsafe { mess_get(label.into(), None) } }
+    pub fn get_item_none() -> &'static mut Il2CppString { unsafe { mess_get("MIID_H_None".into(), None) } }
+    pub fn get_item_none2() -> &'static Il2CppString { unsafe { mess_get("MIID_H_None".into(), None) } }
     pub fn load(filename: &Il2CppString) -> bool {
         unsafe { mess_load(filename, None) }
     }
-
+    pub fn is_exist<'a>(label: impl Into<&'a Il2CppString>) -> bool { unsafe { mess_is_exist(label.into(), None) } }
     pub fn get_language_directory_name() -> &'static Il2CppString {
         unsafe { mess_get_language_directory_name(None) }
     }
     /// For PersonData, JobData, and ItemData using PID / JID / IID
-    pub fn get_name<'a>(value: impl Into<&'a Il2CppString>) -> &'static Il2CppString {
-        unsafe { mess_get_name_data_name(value.into(), None) }
-    }
-    pub fn set_argument<'a>(index: i32, value: impl Into<&'a Il2CppString>) {
-        unsafe { mess_set_argument(index, value.into(), None);}
-    }
-    pub fn set_argument_number(index: i32, value: i32) {
-        unsafe { mess_set_argument_number(index, value, None); }
-    }
+    pub fn get_name<'a>(value: impl Into<&'a Il2CppString>) -> &'static mut Il2CppString { unsafe { mess_get_name_data_name(value.into(), None) } }
+    pub fn set_argument<'a>(index: i32, value: impl Into<&'a Il2CppString>) { unsafe { mess_set_argument(index, value.into(), None);} }
+    pub fn set_argument_number(index: i32, value: i32) { unsafe { mess_set_argument_number(index, value, None); } }
     pub fn create_sprite_tag(category: i32, kind_name: &Il2CppString) -> &'static Il2CppString {
         unsafe { mess_create_sprite_tag(category, kind_name, None)}
     }
+    pub fn create_sprite_tag_str<'a>(category: i32, kind_name:  impl Into<&'a Il2CppString>) -> &'static Il2CppString {
+        unsafe { mess_create_sprite_tag(category, kind_name.into(), None)}
+    }
+    pub fn get_argument(index: i32) -> &'static mut Il2CppString { unsafe { mess_get_argument(index, None) } }
+    pub fn get_intptr<'a>(label: impl Into<&'a Il2CppString>) -> *const u16 { unsafe { mess_get_int_ptr(label.into(), None) } }
+    pub fn get_int_ptr_mut<'a>(label: impl Into<&'a Il2CppString>) -> *mut u16 { unsafe { mess_get_int_ptr_mut(label.into(), None) } }
+    pub fn is_file_exist<'a>(filename: impl Into<&'a Il2CppString>) -> bool {
+        unsafe { mess_file_exists(filename.into(), None) }
+    }
+    pub fn get_event_cmd_text<'a>(label: impl Into<&'a Il2CppString>) -> &'a mut Il2CppString {
+        unsafe { mess_get_event_cmd_text(label.into(), None) }
+    }
+    pub fn free<'a>(label: impl Into<&'a Il2CppString>) -> bool {
+        unsafe { mess_free(label.into(), None) }
+    }
+    
 }
 
 #[repr(C)]
@@ -41,11 +50,21 @@ pub struct MessStaticFields {
     __: [u8; 0xb0],
     pub mess_file_dictionary: &'static mut Dictionary<'static, &'static Il2CppString, &'static MsgFile>,
     pub sound_file_dictionary: &'static Il2CppObject<()>,
-    pub event_file_dictionary: &'static Il2CppObject<()>,
-    pub mess_data_dictionary: &'static mut Dictionary<'static, &'static Il2CppString, *const u8>,
+    pub event_file_dictionary: &'static mut Dictionary<'static, &'static Il2CppString, &'static MsgFile>,
+    pub mess_data_dictionary: &'static mut Dictionary<'static, &'static Il2CppString, *const u16>,
     pub sound_data_dictionary: &'static Il2CppObject<()>,
-    pub event_data_dictionary: &'static Il2CppObject<()>,
+    pub event_data_dictionary: &'static mut Dictionary<'static, &'static Il2CppString, *const u16>,
     pub path_dictionary: &'static mut Dictionary<'static, &'static Il2CppString, &'static Il2CppString>,
+    check_stack: *const u8,
+    pub mess: &'static Il2CppString,
+    pub is_body: bool,
+    pub str_to_lower: bool,
+    pub is_nesting: bool,
+    pub arguments: &'static mut Array<&'static mut Il2CppString>,
+    arg_stack: *const u8,
+    pub partner_pid: Option<&'static mut Il2CppString>,
+    pub sprite_asset_handle: &'static mut Dictionary<'static, &'static Il2CppString, &'static ResourceHandle>,
+
 }
 
 #[repr(C)]
@@ -57,9 +76,9 @@ pub struct MsgFile {
 }
 
 impl MsgFile {
-    pub fn get_text_num() {
-
-    }
+    pub fn get_text_num(&self) -> i32 { unsafe { msbt_get_text_num(self, None) } }
+    pub fn get_label(&self, index: i32) -> &'static Il2CppString { unsafe { msbt_get_label(self, index as usize, None) } }
+    pub fn get_text(&self, index: i32) -> *mut u16 { unsafe { msbt_get_text_u16(self, index as usize, None )} }
 }
 
 #[unity::from_offset("App", "Mess", "GetLanguageDirectoryName")]
@@ -70,6 +89,9 @@ pub fn mess_load_impl(filename: &Il2CppString, is_warning: bool, method_info: Op
 
 #[unity::from_offset("App", "Mess", "Get")]
 fn mess_get(label: &Il2CppString, method_info: OptionalMethod) -> &'static mut Il2CppString;
+
+#[unity::from_offset("App", "Mess", "IsExist")]
+fn mess_is_exist(label: &Il2CppString, method_info: OptionalMethod) -> bool;
 
 #[skyline::from_offset(0x25d3e40)]
 fn mess_load(filename: &Il2CppString, method_info: OptionalMethod) -> bool;
@@ -89,8 +111,11 @@ pub fn msbt_get_label(this: &MsgFile, index: usize, method_info: OptionalMethod)
 #[skyline::from_offset(0x1e97770)]
 pub fn msbt_get_text(this: &MsgFile, index: usize, method_info: OptionalMethod) -> *const u8;
 
+#[skyline::from_offset(0x1e97770)]
+pub fn msbt_get_text_u16(this: &MsgFile, index: usize, method_info: OptionalMethod) -> *mut u16;
+
 #[skyline::from_offset(0x025daae0)]
-fn mess_get_name_data_name(value: &Il2CppString, method_info: OptionalMethod) -> &'static Il2CppString;
+fn mess_get_name_data_name(value: &Il2CppString, method_info: OptionalMethod) -> &'static mut Il2CppString;
 
 #[skyline::from_offset(0x025d77c0)]
 fn mess_set_argument(index: i32, value: &Il2CppString, method_info: OptionalMethod);
@@ -100,3 +125,21 @@ fn mess_create_sprite_tag(category: i32, kind_name: &Il2CppString, method_info: 
 
 #[skyline::from_offset(0x25da0d0)]
 fn mess_set_argument_number(index: i32, value: i32, method_info: OptionalMethod);
+
+#[skyline::from_offset(0x25da160)]
+fn mess_get_argument(index: i32, method_info: OptionalMethod) -> &'static mut Il2CppString;
+
+#[skyline::from_offset(0x25d7f90)]
+fn mess_get_int_ptr(label: &Il2CppString, optional_method: OptionalMethod) -> *const u16;
+
+#[skyline::from_offset(0x25d7f90)]
+fn mess_get_int_ptr_mut(label: &Il2CppString, optional_method: OptionalMethod) -> *mut u16;
+
+#[skyline::from_offset(0x25d6880)]
+fn mess_file_exists(filename: &Il2CppString, method_info: OptionalMethod) -> bool;
+
+#[skyline::from_offset(0x25d8820)]
+fn mess_get_event_cmd_text(label: &Il2CppString, method_info: OptionalMethod) -> &'static mut Il2CppString;
+
+#[unity::from_offset("App", "Mess", "Free")]
+fn mess_free(filename: &Il2CppString, method_info: OptionalMethod) -> bool;

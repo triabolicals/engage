@@ -1,7 +1,16 @@
 //! Types and methods to manipulate the script system for events.
 use unity::prelude::*;
+use crate::{unit::Unit, gamedata::item::ItemData, proc::ProcInst};
 
-use crate::{gamedata::{item::ItemData, unit::Unit}, proc::ProcInst};
+mod game;
+mod unit;
+mod system;
+mod map;
+
+pub use game::ScriptGame;
+pub use unit::ScriptUnit;
+pub use system::ScriptSystem;
+pub use map::ScriptMap;
 
 #[unity::from_offset("App", "ScriptSystem", "Log")]
 pub fn scriptsystem_log(args: *const u8);
@@ -144,6 +153,18 @@ pub struct DynValue {
 }
 
 impl DynValue {
+    #[unity::class_method(8)] pub fn get_string(&self) -> Option<&'static mut Il2CppString>; // Offset: 0x2E24420 Flags: 0
+    #[unity::class_method(58)] pub fn assign(&self, value: &DynValue); // Offset: 0x2E369A0 Flags: 0
+    #[unity::class_method(65)] pub fn assign_number(&self, num: f64); // Offset: 0x2E3F0A0 Flags: 0
+    #[unity::class_method(15)] pub fn new_boolean(v: bool) -> &'static DynValue; // Offset: 0x2E200F0 Flags: 0
+    #[unity::class_method(16)] pub fn new_number(num: f64) -> &'static DynValue; // Offset: 0x2E24D10 Flags: 0
+    #[unity::class_method(17)] pub fn new_string(str: &Il2CppString) -> &'static DynValue; // Offset: 0x2E20010 Flags: 0
+
+    #[unity::class_method(15)] pub fn new_boolean_mut(v: bool) -> &'static mut DynValue; // Offset: 0x2E200F0 Flags: 0
+    #[unity::class_method(16)] pub fn new_number_mut(num: f64) -> &'static mut DynValue; // Offset: 0x2E24D10 Flags: 0
+    #[unity::class_method(17)] pub fn new_string_mut(str: &Il2CppString) -> &'static mut DynValue; // Offset: 0x2E20010 Flags: 0
+    /*
+    pub fn get_string(&self) -> Option<&'static mut Il2CppString> { unsafe { dynvalue_get_string(self, None )}}
     pub fn new_boolean(value: bool) -> &'static mut DynValue {
         unsafe { dynvalue_newboolean(value, None) }
     }
@@ -153,9 +174,10 @@ impl DynValue {
     pub fn new_number(value: f64) -> &'static mut DynValue {
         unsafe { dynvalue_new_number(value, None) }
     }
-    pub fn assign(&self, value: &Self) { unsafe { dynvalue_assign(self, value, None); } }
-}
 
+     */
+}
+/*
 #[skyline::from_offset(0x2e200f0)]
 fn dynvalue_newboolean(v: bool, method_info: OptionalMethod) -> &'static mut DynValue;
 
@@ -167,7 +189,9 @@ fn dynvalue_new_number(v: f64, method_info: OptionalMethod) -> &'static mut DynV
 
 #[skyline::from_offset(0x02e369a0)]
 fn dynvalue_assign(this: &DynValue, value: &DynValue, method_info: OptionalMethod);
-
+#[skyline::from_offset(0x2e24420)]
+fn dynvalue_get_string(this: &DynValue, method_info: OptionalMethod) -> Option<&'static mut Il2CppString>;
+*/
 pub trait ScriptUtils {
     fn try_get_i32(&self, index: i32) -> i32;
     fn try_get_string(&self, index: i32) -> Option<&'static Il2CppString>;

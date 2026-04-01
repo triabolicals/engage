@@ -8,8 +8,11 @@ edition = "2021"
 [dependencies]
 num-traits = "0.2"
 num-derive = "0.4"
-skyline = { git = "https://github.com/Raytwo/skyline-rs", branch = "preview" }
+skyline = { git = "https://github.com/ultimate-research/skyline-rs", version = "0.6.0" }
 unity = { version = "0.3.0", git = "https://github.com/DivineDragonFanClub/unity" }
 modular-bitfield = "0.11.2"
 bitflags = "2.4.0"
-lazysimd = { git = "https://github.com/Raytwo/lazysimd" }
+paste = "1.0.15"
+identconv = "0.2.0"
+[patch."https://github.com/DivineDragonFanClub/unity"]
+unity = {path = "/Users/trile/Project/lib2/unity"}

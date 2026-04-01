@@ -5,3 +5,7 @@ pub mod terrain;
 pub mod overlap;
 pub mod sight;
 pub mod inspectors;
+pub mod mind;
+pub mod panel;
+pub mod history;
+pub mod effect;

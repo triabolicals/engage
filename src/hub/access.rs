@@ -1,3 +1,4 @@
+use unity::engine::MonoBehaviorFields;
 use unity::prelude::*;
 use unity::system::List;
 
@@ -5,12 +6,32 @@ use crate::gamedata::{
     animal::AnimalData,
     *,
 };
+use crate::gamedata::hub::HubDisposData;
+use crate::sequence::hub::HubSequence;
+use crate::unityengine::{GameObject, Transform, UnityComponent, UnityObject};
+
 #[unity::class("App", "HubAccess")]
 pub struct HubAccess {
-    junk: [u8; 0x50],
-    pub access_data: Option<&'static mut HubAccessData>,
-    pub item_effect: u64,
+    parent: MonoBehaviorFields,
+    pub aid: &'static Il2CppString, // Offset 0x18, Attr: 6
+    player_transform: &'static Transform, // Offset 0x20, Attr: 1
+    target_transform: &'static Transform, // Offset 0x28, Attr: 1
+    junk: [u8; 0x30],
+    pub access_data: Option<&'static mut HubAccessData>, // Offset 0x60, Attr: 1
+    pub item_effect: Option<&'static GameObject>,
+    /*
+    help_offset: Vector3, // Offset 0x30, Attr: 1
+    is_wall: bool, // Offset 0x3C, Attr: 1
+    orig_position: Vector3, // Offset 0x40, Attr: 1
+    orig_rotation: Quaternion, // Offset 0x4C, Attr: 1
+    m_access_data: &HubAccessData, // Offset 0x60, Attr: 1
+    item_effect: &GameObject, // Offset 0x68, Attr: 1
+    access_cursor_object: &GameObject, // Offset 0x70, Attr: 1
+    access_cursor: &HubAccessCursor, // Offset 0x78, Attr: 1
+     */
 }
+impl UnityComponent for HubAccess {}
+impl UnityObject for HubAccess {}
 
 #[unity::class("App", "HubAccessData")]
 pub struct HubAccessData {
@@ -26,30 +47,7 @@ pub struct HubAccessData {
     pub is_hero_birthday: bool,
     pub talk_item: Option<&'static Il2CppString>,
     pub item_count: i32,
-    //
 }
-
-#[unity::class("App", "HubDisposData")]
-pub struct HubDisposData {
-    pub parent: StructDataArrayFields,
-    pub locator: &'static Il2CppString,
-    pub parent_locator: Option<&'static Il2CppString>,
-    pub is_must_child: bool,
-    pub fade_distance: f32,
-    pub priority: i32,
-    pub chapter: Option<&'static Il2CppString>,
-    pub phase: i32,
-}
-impl GamedataArray for HubDisposData {}
-
-#[unity::class("App", "HubRandomSet")]
-pub struct HubRandomSet {
-    pub parent: StructDataArrayFields,
-    pub iid: &'static Il2CppString,
-    pub rate: i32,
-    pub count: i32,
-}
-impl GamedataArray for HubRandomSet {}
 
 #[unity::class("App", "HubAccessManager")]
 pub struct HubAccessManager {
@@ -62,106 +60,39 @@ pub struct HubAccessManager {
 }
 
 impl HubAccess {
-    pub fn locate(&self, locator: &Il2CppString) { unsafe { access_locate(self, locator, None); } }
-    pub fn done(&self) { unsafe { access_done(self, None); }}
-    pub fn clear(&self) { unsafe { access_clear(self, None); } }
+    #[unity::class_method(42)] pub fn locate(&self, locator: &Il2CppString); // Offset: 0x2169360 Flags: 0
+    #[unity::class_method(43)] pub fn clear(&self); // Offset: 0x216A0B0 Flags: 0
+    #[unity::class_method(44)] pub fn done_access(&self); // Offset: 0x216A0F0 Flags: 0
+    #[unity::class_method(45)] pub fn execute(&self, hub_sequence: &HubSequence) -> bool; // Offset: 0x216A2B0 Flags: 0
+    #[unity::class_method(46)] pub fn refresh(&self); // Offset: 0x216A820 Flags: 0
+    #[unity::class_method(55)] pub fn create_item_effect(&self); // Offset: 0x2169CE0 Flags: 0
 }
 
-impl HubDisposData {
-    pub fn get_array_mut() -> Option<&'static mut StructList<List<Self>>> {
-        let method = Self::class()._1.parent.get_methods().iter().find(|method| method.get_name() == Some(String::from("GetList"))).unwrap();
-        let get_list = unsafe {
-            std::mem::transmute::<_, extern "C" fn(&MethodInfo) -> Option<&'static mut StructList<List<Self>>>>(
-                method.method_ptr,
-            )
-        };
-        get_list(method)
-    }
-    pub fn get_aid(&self) -> Option<&'static Il2CppString> { unsafe { dispos_hub_get_aid(self, None)}}
-    pub fn get_locator(&self) -> &'static Il2CppString { unsafe { dispos_hub_get_locator(self, None) } }
-    pub fn load() { unsafe { access_load(None); }}
-    pub fn set_aid(&self, value: &Il2CppString) { unsafe { dispos_hub_set_aid(self, value, None); }}
-    pub fn set_chapter(&self, value: &Il2CppString) { unsafe { dispos_hub_set_chapter(self, value, None); }}
-    pub fn unload() {
-        let mut method =  Self::class().get_methods().iter().find(|method| method.get_name() == Some(String::from("Unload")));
-        if method.is_none() {
-            method = Self::class()._1.parent.get_methods().iter().find(|method| method.get_name() == Some(String::from("Unload")));
-        }
-        if method.is_none() {
-            method = Self::class()._1.parent._1.parent.get_methods().iter().find(|method| method.get_name() == Some(String::from("Unload")));
-        }
-        if method.is_none() {
-            return;
-        }
-        let unload = unsafe {
-            std::mem::transmute::<_, extern "C" fn(&MethodInfo) -> ()> (
-                method.unwrap().method_ptr,
-            )
-        };
-    
-        unload(method.unwrap());
-    }
-}
 
 impl HubAccessManager {
-    pub fn get_not_taken_bond_frags(&self) -> i32 { unsafe { get_not_taken_piece_of_bond(self, None) }}
+    #[unity::class_method(12)] pub fn is_item_type(dispos: &HubDisposData) -> bool; // Offset: 0x216FA20 Flags: 0
+    #[unity::class_method(14)] pub fn confirm_content(&self); // Offset: 0x21708F0 Flags: 0
+    #[unity::class_method(15)] pub fn reset(&self); // Offset: 0x2170380 Flags: 0
+    #[unity::class_method(16)] pub fn refresh(&self); // Offset: 0x2170EE0 Flags: 0
+    #[unity::class_method(17)] pub fn is_used_locator(&self, locator_name: &Il2CppString) -> bool; // Offset: 0x21706A0 Flags: 0
+    #[unity::class_method(19)] pub fn try_remove_access_object(&self, data: &HubDisposData) -> bool; // Offset: 0x2170850 Flags: 0
+    #[unity::class_method(20)] pub fn add_new_locator(&self, locator: &Il2CppString) -> Option<&'static HubAccessData>; // Offset: 0x2171AD0 Flags: 0
+    #[unity::class_method(21)] pub fn clear_locator(&self, locator: &Il2CppString); // Offset: 0x2171C40 Flags: 0
+    #[unity::class_method(22)] pub fn find_locator(&self, locator: &Il2CppString) -> Option<&'static HubAccessData>; // Offset: 0x2169BF0 Flags: 0
+    #[unity::class_method(23)] pub fn find_pid(&self, pid: &Il2CppString) -> Option<&'static HubAccessData>; // Offset: 0x2171CC0 Flags: 0
+    #[unity::class_method(24)] pub fn is_already_located(&self, pid: &Il2CppString) -> bool; // Offset: 0x2171E40 Flags: 0
+    #[unity::class_method(25)] pub fn is_available_pid(&self, pid: &Il2CppString, disabled_talk: bool) -> bool; // Offset: 0x2171E60 Flags: 0
+    #[unity::class_method(31)] pub fn entry_talk_limit(&self, talk_type: &Il2CppString) -> bool; // Offset: 0x216EE20 Flags: 0
+    #[unity::class_method(32)] pub fn get_not_take_piece_of_bond(&self) -> i32; // Offset: 0x21733A0 Flags: 0
 }
 
 impl HubAccessData {
     // marks the access point as interacted
-    pub fn done(&self) -> bool { unsafe { access_data_done(self, None)}}
-    
-    // Checks if access point is interacted
-    pub fn get_is_done(&self) -> bool { unsafe { access_data_is_done(self, None)}}
-
-    pub fn get_item_count(&self) -> i32 { unsafe { access_data_item_count(self, None) }}
-    pub fn get_talk_item(&self) -> Option<&'static Il2CppString> { unsafe { hub_access_get_talk_item(self, None) }}
-
-    pub fn is_animal(&self) -> bool { unsafe { access_data_is_animal(self, None)}}
-    pub fn try_get_pid(&self) -> Option<&'static Il2CppString> { unsafe { access_data_try_get_pid(self, None) } }
+    #[unity::class_method(15)] pub fn get_is_done(&self) -> bool; // Offset: 0x21681C0 Flags: 0
+    #[unity::class_method(16)] pub fn get_is_accessed(&self) -> bool; // Offset: 0x2167FB0 Flags: 0
+    #[unity::class_method(32)] pub fn done_access(&self) -> bool; // Offset: 0x216A220 Flags: 0
+    #[unity::class_method(30)] pub fn update_access_count(&self); // Offset: 0x21687C0 Flags: 0
+    #[unity::class_method(31)] pub fn pre_locate(&self); // Offset: 0x216CC00 Flags: 0
+    #[unity::class_method(39)] pub fn try_get_pid(&self) -> Option<&'static Il2CppString>; // Offset: 0x216BBD0 Flags: 0
+        // Checks if access point is interacted
 }
-
-#[unity::from_offset("App", "HubAccessData", "get_TalkItem")]
-pub fn hub_access_get_talk_item(this: &HubAccessData, method_info: OptionalMethod) -> Option<&'static Il2CppString>;
-
-#[skyline::from_offset(0x21733a0)]
-pub fn get_not_taken_piece_of_bond(this: &HubAccessManager, method_info: OptionalMethod) -> i32;
-
-#[unity::from_offset("App", "HubDisposData", "get_Locator")]
-pub fn dispos_hub_get_locator(this: &HubDisposData, method_info: OptionalMethod) -> &'static Il2CppString;
-
-#[unity::from_offset("App", "HubDisposData", "get_AID")]
-pub fn dispos_hub_get_aid(this: &HubDisposData, method_info: OptionalMethod) -> Option<&'static Il2CppString>;
-
-#[unity::from_offset("App", "HubDisposData", "set_AID")]
-pub fn dispos_hub_set_aid(this: &HubDisposData, value :&Il2CppString, method_info: OptionalMethod);
-
-#[unity::from_offset("App", "HubDisposData", "set_Chapter")]
-pub fn dispos_hub_set_chapter(this: &HubDisposData, value :&Il2CppString, method_info: OptionalMethod);
-
-#[unity::from_offset("App", "HubAccessData", "get_IsDone")]
-pub fn access_data_is_done(this: &HubAccessData, method_info: OptionalMethod) -> bool;
-
-#[unity::from_offset("App", "HubAccessData", "DoneAccess")]
-pub fn access_data_done(this: &HubAccessData, method_info: OptionalMethod) -> bool;
-
-#[unity::from_offset("App", "HubAccessData", "get_ItemCount")]
-pub fn access_data_item_count(this: &HubAccessData, method_info: OptionalMethod) -> i32;
-
-#[unity::from_offset("App", "HubAccessData", "get_IsAnimal")]
-pub fn access_data_is_animal(this: &HubAccessData, method_info: OptionalMethod) -> bool;
-
-#[unity::from_offset("App", "HubDisposData", "Load")]
-pub fn access_load(method_info: OptionalMethod);
-
-#[unity::from_offset("App", "HubAccessData", "TryGetPID")]
-pub fn access_data_try_get_pid(this: &HubAccessData, method_info: OptionalMethod) -> Option<&'static Il2CppString>;
-
-#[unity::from_offset("App", "HubAccess", "Locate")]
-fn access_locate(this: &HubAccess, locator: &Il2CppString, method_info: OptionalMethod);
-
-#[unity::from_offset("App", "HubAccess", "DoneAccess")]
-fn access_done(this: &HubAccess, method_info: OptionalMethod);
-
-#[unity::from_offset("App", "HubAccess", "Clear")]
-fn access_clear(this: &HubAccess, method_info: OptionalMethod);

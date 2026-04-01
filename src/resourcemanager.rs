@@ -1,5 +1,7 @@
 use unity::prelude::*;
+use unity::system::action::Action;
 use unity::system::Dictionary;
+use crate::unityengine::{GameObject, Transform};
 
 #[unity::class("App", "ResourceManager")]
 pub struct ResourceManager {}
@@ -15,6 +17,20 @@ impl ResourceManager {
         unsafe { resource_manager_file_exist(path.into(), None) }
     }
     pub fn is_loading() -> bool { unsafe { is_loading(None) } }
+
+    pub fn instantiate<'a>(path: impl Into<&'a Il2CppString>, parent_transform: Option<&Transform>) -> Option<&'static GameObject>{
+        unsafe {
+            resource_manager_instantiate_with_transform(path.into(), parent_transform, None)
+        }
+    }
+    pub fn instantiate2<'a>(path: impl Into<&'a Il2CppString>, parent: &GameObject) -> Option<&'static GameObject> {
+        Self::instantiate2_(path.into(), parent)
+    }
+
+    #[unity::class_method(22)] pub fn instantiate2_(path: &Il2CppString, parent: &GameObject) -> Option<&'static GameObject>; // Offset: 0x1FFE9A0 Flags: 0
+
+    #[unity::class_method(17, generic)] pub fn load_global_async<T>(path: &Il2CppString, completed: Option<&'static Action>) where T: Il2CppClassData; // Offset: -1 Flags: 1
+    #[unity::class_method(18)] pub fn release_global(path: &Il2CppString); // Offset: 0x1FFF030 Flags: 0
 }
 
 
@@ -25,8 +41,22 @@ pub struct ResourceHandle {
     handle: [u8; 0x18],
 }
 
+#[unity::class("App", "ResourceGameObject")]
+pub struct ResourceGameObject { }
+
+#[unity::class("App", "TResourceHandle`1")]
+pub struct TResourceHandle { }
+
+impl TResourceHandle {
+    #[unity::class_method(2)] pub fn get_asset(&self) -> Option<&'static GameObject>; // Offset: 0xFFFFFFFFFFFFFFFF Flags: 0
+    #[unity::class_method(3)] pub fn load_async(&self, path: &Il2CppString, completed: OptionalMethod); // Offset: 0xFFFFFFFFFFFFFFFF Flags: 0
+}
+
 #[unity::from_offset("App", "ResourceManager", "IsLoading")]
 pub fn is_loading(method_info: OptionalMethod) -> bool;
 
 #[skyline::from_offset(0x020169f0)]
 fn resource_manager_file_exist(path: &Il2CppString, method_info: OptionalMethod) -> bool;
+
+#[skyline::from_offset(0x20167d0)]
+fn resource_manager_instantiate_with_transform(path: &Il2CppString, x: Option<&Transform>, method_info: OptionalMethod) -> Option<&'static GameObject>;

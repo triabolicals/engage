@@ -1,6 +1,6 @@
 use unity::prelude::*;
-
-use super::{BasicDialogItem, BasicDialogItemFields};
+use unity::system::action::Action;
+use super::{BasicDialogItem, BasicDialogItemFields, DialogMenuItem};
 use crate::{mess::Mess, menu::BasicMenuResult, proc::Bindable};
 
 #[repr(C)]
@@ -38,6 +38,16 @@ impl YesNoDialog {
         unsafe {
             yesnodialog_createbind(proc, message.as_ref().into(), first_item, second_item, None);
         }
+    }
+    pub fn bind_no_method(
+        proc: &impl Bindable,
+        message: impl AsRef<str>,
+        first_text: impl AsRef<str>,
+        second_text: impl AsRef<str>,
+    ) {
+        let first_item = BasicDialogItemYes::new(first_text);
+        let second_item = BasicDialogItemNo::new(second_text);
+        unsafe { yesnodialog_createbind(proc, message.as_ref().into(), first_item, second_item, None); }
     }
 }
 
@@ -109,3 +119,4 @@ impl BasicDialogItemNo {
         item
     }
 }
+impl DialogMenuItem for BasicDialogItemNo {}

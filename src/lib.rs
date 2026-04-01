@@ -1,4 +1,4 @@
-#![feature(ptr_sub_ptr)]
+pub use unity::prelude::*;
 
 pub mod battle;
 pub mod bundle;
@@ -18,11 +18,9 @@ pub mod gameuserdata;
 pub mod gameuserglobaldata;
 pub mod gamevariable;
 pub mod gmapspotmanager;
-pub mod godpool;
 pub mod language;
 pub mod loadingmanager;
 pub mod map;
-pub mod mapmind;
 pub mod menu;
 pub mod mess;
 pub mod noticemanager;
@@ -38,7 +36,6 @@ pub mod stream;
 pub mod titlebar;
 pub mod tmpro;
 pub mod uniticon;
-pub mod unitpool;
 pub mod unityengine;
 pub mod util;
 pub mod vibrationmanager;
@@ -49,3 +46,12 @@ pub mod backgroundmanager;
 pub mod reliance;
 pub mod bit;
 pub mod keyboard;
+pub mod scene;
+pub mod unitinfo;
+pub mod delegate;
+pub mod transporter;
+pub mod unit;
+pub mod god;
+pub mod keyhelp;
+pub mod game;
+pub mod ut;

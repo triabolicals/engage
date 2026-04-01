@@ -1,7 +1,5 @@
 use std::cell::UnsafeCell;
-
 use unity::prelude::*;
-
 use super::{Bindable, ProcDesc, RawValueStack};
 
 /// Represents a Instruction unit for a [`Proc`].
@@ -53,14 +51,16 @@ impl ProcInst {
     pub fn cast<T: AsRef<ProcInstFields>>(&self) -> &T {
         unsafe { std::mem::transmute::<&ProcInst, &T>(self) }
     }
-
     pub fn cast_mut<T: AsMut<ProcInstFields>>(&mut self) -> &mut T {
         unsafe { std::mem::transmute::<&mut ProcInst, &mut T>(self) }
     }
+    fn cast2<T: Bindable>(&self) -> &'static T { unsafe { std::mem::transmute::<&Self, &T>(self) } }
+    fn cast2_mut<T: Bindable>(&mut self) -> &mut T { unsafe { std::mem::transmute::<&mut Self, &mut T>(self) } }
 
     pub fn jump<T: Bindable + ?Sized>(proc: &T, label: i32) {
         unsafe { procinst_jump(proc, label, None) }
     }
+    #[unity::class_method(17)] pub fn get_label(&self) -> i32; // Offset: 0x281EB10 Flags: 0
 }
 
 impl ProcInstFields {
@@ -68,7 +68,6 @@ impl ProcInstFields {
         // Ray: yes, this'd crash if null. I'll fix later.
         *self.parent.as_ref().unwrap()
     }
-
     pub fn get_parent_mut(&'static mut self) -> &'static mut ProcInst {
         // Ray: yes, this'd crash if null. I'll fix later.
         *self.parent.as_mut().unwrap()
@@ -102,8 +101,25 @@ impl ProcInstFields {
         unsafe {&mut *self.descs.get() }
     }
 }
+impl Bindable for ProcInst {}
 
-impl Bindable for ProcInst { }
+#[repr(C)]
+pub struct SingletonProcInstFields {
+    pub parent: ProcInstFields,
+    pub is_resume: bool,
+    pub is_loaded: bool,
+}
+
+#[repr(C)]
+pub struct ProcSceneSequenceFields {
+    pub parent: ProcInstFields,
+    pub is_resume: bool,
+    pub is_loaded: bool,
+    pub scene_name: &'static Il2CppString,
+    pub scene_mode: i32,
+    pub padding: i32,
+}
+
 
 #[unity::from_offset("App", "ProcInst", "CreateBind")]
 pub fn procinst_createbind<T: Bindable + ?Sized, P: Bindable>(
@@ -113,9 +129,18 @@ pub fn procinst_createbind<T: Bindable + ?Sized, P: Bindable>(
     name: &'static Il2CppString,
     method_info: OptionalMethod,
 );
+#[unity::from_offset("App", "ProcInst", "CreateBindNoDesc")]
+pub fn procinst_createbind_no_desc<T: Bindable + ?Sized, P: Bindable>(
+    this: &T,
+    parent: &P,
+    method_info: OptionalMethod,
+);
 
 #[unity::from_offset("App", "ProcInst", "OnDispose")]
 pub fn procinst_ondispose(this: &ProcInst, method_info: OptionalMethod);
+
+#[unity::from_offset("App", "ProcInst", "GetChild")]
+pub fn procinst_get_child<B: Bindable + ?Sized>(this: &B, method_info: OptionalMethod) -> Option<&'static mut ProcInst>;
 
 #[skyline::from_offset(0x281E6F0)]
 pub fn procinst_jump<T: Bindable + ?Sized>(this: &T, label: i32, method_info: OptionalMethod);

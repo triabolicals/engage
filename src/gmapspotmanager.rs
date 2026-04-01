@@ -1,5 +1,5 @@
 use unity::prelude::*;
-use crate::gamedata::dispos::ChapterData;
+use crate::gamedata::chapter::ChapterData;
 
 pub struct GmapSpotManager;
 

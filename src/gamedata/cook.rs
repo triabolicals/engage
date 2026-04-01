@@ -1,5 +1,6 @@
 use unity::prelude::*;
-use crate::gamedata::{*, person::CapabilitySbyte};
+use crate::gamedata::*;
+use crate::unit::CapabilitySbyte;
 
 // CookData, TasteData and TasteConditionData
 #[unity::class("App", "TasteDataFlag")]
@@ -18,6 +19,9 @@ pub struct TasteData {
     pub enhanced: &'static CapabilitySbyte,
     pub flag: &'static TasteDataFlag,
     pub cid: &'static Il2CppString,
+    pub alt_taste: Option<&'static Il2CppString>,
+    pub derive_probability: i8,
+    pub derived_tid: Option<&'static Il2CppString>,
 }
 
 #[unity::class("App", "CookData")]

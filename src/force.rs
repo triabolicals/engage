@@ -1,7 +1,8 @@
 use unity::prelude::*;
-use crate::gamedata::unit::Unit;
+use crate::unit::Unit;
 
-#[repr(C)]
+#[repr(i32)]
+#[derive(PartialEq, Clone, Copy)]
 pub enum ForceType {
     Player = 0,
     Enemy = 1,

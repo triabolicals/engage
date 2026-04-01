@@ -2,8 +2,9 @@
 
 use num_derive::{FromPrimitive, ToPrimitive};
 use crate::{singleton::SingletonClass, gamevariable::GameVariable};
-use crate::gamedata::dispos::ChapterData;
 use unity::{il2cpp::class::Il2CppRGCTXData, prelude::*};
+use crate::gamedata::chapter::ChapterData;
+use crate::stream::Stream;
 
 #[repr(C)]
 #[unity::class("App", "GameUserData")]
@@ -18,6 +19,12 @@ pub struct GameUserData {
     content_index: i32,
     variable: *const u8,
     pub gold: i32,
+    progress: i32,
+    training_count: i32,
+    arena_count: i32,
+    unit_info_mode: i32,
+    pub piece_of_bond: i32,
+    pub total_piece_of_bond: i32,
 }
 
 #[unity::from_offset("App", "GameUserData", "get_Variable")]
@@ -28,7 +35,6 @@ fn set_game_mode(this: &GameUserData, game_mode: GameMode, method_info: Optional
 
 #[unity::from_offset("App", "GameUserData", "GetGameMode")]
 fn get_game_mode(this: &GameUserData, method_info: OptionalMethod) -> GameMode;
-
 
 
 #[repr(C)]
@@ -64,6 +70,7 @@ impl From<i32> for GameMode {
 }
 
 impl GameUserData {
+    pub fn cleanup_for_chapter() { Self::get_instance().cleanup_for_chapter_(); }
     pub fn get_instance() -> &'static mut GameUserData {
         let idk = get_generic_class!(SingletonClass<GameUserData>).unwrap();
         let pointer = unsafe { &*(idk.rgctx_data as *const Il2CppRGCTXData as *const u8 as *const [&'static MethodInfo; 6]) };
@@ -99,9 +106,7 @@ impl GameUserData {
         unsafe { getgrowmode(instance, None)}
     }
     pub fn set_grow_mode(value: i32) {
-        unsafe {
-            game_user_data_set_grow_mode(Self::get_instance(), value, None);
-        }
+        unsafe { game_user_data_set_grow_mode(Self::get_instance(), value, None); }
     }
 
     pub fn get_sequence() -> i32 {
@@ -140,24 +145,21 @@ impl GameUserData {
         let instance = Self::get_instance();
         unsafe {
             let new_amount = get_piece_of_bond(instance, None) + amount;
-           set_piece_of_bond(instance, new_amount, None);
+            set_piece_of_bond(instance, new_amount, None);
             new_amount
         }
     }
-    pub fn get_chapter() -> &'static ChapterData { unsafe { get_chapter_data(Self::get_instance(), None)}}
+    pub fn get_chapter() -> &'static mut ChapterData { unsafe { get_chapter_data(Self::get_instance(), None) } }
     pub fn get_status() -> &'static mut GameUserDataStatus { unsafe { get_game_user_data_status(Self::get_instance(), None) } }
     pub fn get_gold() -> i32 {
-        unsafe {
-            game_user_data_get_gold(Self::get_instance(), None)
-        }
-
+        unsafe { game_user_data_get_gold(Self::get_instance(), None) }
     }
     pub fn set_gold(monies: i32) { unsafe { setgold(Self::get_instance(), monies, None );} }
     pub fn set_iron(amount: i32){ unsafe { game_user_data_set_iron(Self::get_instance(), amount, None); } }
     pub fn set_steel(amount: i32){ unsafe { game_user_data_set_steel(Self::get_instance(), amount, None); } }
     pub fn set_silver(amount: i32){ unsafe { game_user_data_set_silver(Self::get_instance(), amount, None); } }
     pub fn set_bond(amount: i32){ unsafe {set_piece_of_bond(Self::get_instance(), amount, None); } }
-
+    pub fn get_mascot_name() -> &'static mut Il2CppString { unsafe { game_user_data_get_mascot_name(Self::get_instance(), None) }}
     pub fn set_field_bgm_player(event_name: &Il2CppString) { unsafe { game_user_data_set_field_bgm_player(Self::get_instance(), event_name, None); }}
     pub fn set_field_bgm_enemy(event_name: &Il2CppString) { unsafe { game_user_data_set_field_bgm_enemy(Self::get_instance(), event_name, None); }}
     
@@ -166,6 +168,10 @@ impl GameUserData {
     pub fn set_chapter(chapter: &ChapterData) { unsafe { set_chapter_data(Self::get_instance(), chapter, None); }}
     pub fn is_chapter_completed(chapter: &ChapterData) -> bool { unsafe {is_completed_chapterdata(Self::get_instance(), chapter, None) }}
     pub fn is_evil_map() -> bool { unsafe { is_evil_map(Self::get_instance(), None) }}
+
+    #[unity::class_method(145)] pub fn on_serialize(&self, stream: &Stream); // Offset: 0x2517840 Flags: 0
+    #[unity::class_method(146)] pub fn on_deserialize(&self, stream: &Stream, version: i32); // Offset: 0x2518170 Flags: 0
+    #[unity::class_method(80)] pub fn cleanup_for_chapter_(&self); // Offset: 0x2512DE0 Flags: 0
 }
 
 
@@ -227,7 +233,7 @@ fn is_completed(this: &GameUserData, cid: &Il2CppString, method_info: OptionalMe
 fn is_completed_chapterdata(this: &GameUserData, chapter: &ChapterData, method_info: OptionalMethod) -> bool;
 
 #[unity::from_offset("App", "GameUserData", "get_Chapter")]
-fn get_chapter_data(this: &GameUserData, method_info: OptionalMethod) -> &'static ChapterData;
+fn get_chapter_data(this: &GameUserData, method_info: OptionalMethod) -> &'static mut ChapterData;
 
 #[unity::from_offset("App", "GameUserData", "SetChapter")]
 fn set_chapter_data(this: &GameUserData, chapter: &ChapterData, method_info: OptionalMethod);
@@ -245,3 +251,6 @@ fn game_user_data_set_grow_mode(this: &GameUserData, value: i32, method_info: Op
 
 #[unity::from_offset("App", "GameUserData", "get_Gold")]
 fn game_user_data_get_gold(this: &GameUserData, method_info: OptionalMethod) -> i32;
+
+#[unity::from_offset("App", "GameUserData", "get_MascotName")]
+fn game_user_data_get_mascot_name(this: &GameUserData, method_info: OptionalMethod) -> &'static mut Il2CppString;

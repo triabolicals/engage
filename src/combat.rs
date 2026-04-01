@@ -1,15 +1,29 @@
 //! Types and methods to query the state of [`Unit`](crate::gamedata::unit::Unit)s in battle.
 
-use unity::engine::Color;
+mod character;
+
+use bitflags::bitflags;
 use unity::il2cpp::object::Array;
 use unity::prelude::*;
-use unity::system::List;
-use crate::battle::BattleCalculator;
+use unity::system::{List, ListFields};
+use unity::system::action::Action;
+use crate::battle::{BattleCalculator, BattleSideType};
 use crate::force::Force;
-use crate::gamedata::{JobData, PersonData};
-use crate::gamedata::assettable::{AssetTableResult, AssetTableSound};
-use crate::gamedata::item::UnitItem;
-use crate::gamedata::unit::Unit;
+use crate::unityengine::{GameObject, Transform, UnityComponent, UnityObject};
+
+pub use character::*;
+use crate::gamedata::job::JobData;
+use crate::gamedata::person::PersonData;
+use crate::unit::{Unit, UnitItem};
+#[unity::class("Combat", "Kaneko")] pub struct Kaneko { }
+
+impl Kaneko {
+    #[unity::class_method(0)] pub fn find_in_children(this: &Transform, name: &Il2CppString) -> Option<&'static Transform>; // Offset: 0x205B910 Flags: 0
+    #[unity::class_method(3)] pub fn ancestor(t: &Transform) -> &'static Transform; // Offset: 0x205C1E0 Flags: 0
+    #[unity::class_method(6)] pub fn destroy<T>(obj: &T) where T: UnityObject; // Offset: 0x205C2A0 Flags: 0
+    #[unity::class_method(7)] pub fn destroy_component<T>(obj: &T) where T: UnityComponent; // Offset: 0x205C360 Flags: 0
+    #[unity::class_method(8)] pub fn is_destroyed<T>(obj: &T) -> bool where T: UnityObject; // Offset: 0x205C420 Flags: 0
+}
 
 #[unity::class("Combat", "Character")]
 pub struct Character {
@@ -23,7 +37,7 @@ pub struct Character {
     fsm: *const u8,
     brain: *const u8,
     pub game_status: Option<&'static mut CharacterGameStatus>,
-    is_done_setup: bool,
+    pub is_done_setup: bool,
     head_look_at_ik: *const u8,
     body_look_at_ik: *const u8,
     enemy_side: i32,
@@ -56,21 +70,52 @@ pub struct Character {
 }
 
 impl Character {
-    pub fn get_phase(&self) -> &Phase {
-        unsafe { character_get_phase(self, None) }
-    }
+    // pub fn get_phase(&self) -> &Phase { unsafe { character_get_phase(self, None) } }
+    // pub fn get_game_status(&self) -> &'static mut CharacterGameStatus { unsafe { character_get_status(self, None) } }
+    // pub fn get_builder(&self) -> &'static mut CharacterBuilder { unsafe { character_get_builder(self, None) } }
+    // pub fn call_on_setup_done(&self, action: &Action) { unsafe { character_call_on_setup_done(self, action, None) }; }
+    #[unity::class_method(0)] pub fn get_side(&self) -> i32; // Offset: 0x2AFC5A0 Flags: 0
+
+    #[unity::class_method(18)] pub fn get_phase(&self) -> &'static Phase; // Offset: 0x2AFCB70 Flags: 0
+    #[unity::class_method(19)] pub fn get_game_status(&self) -> &'static mut CharacterGameStatus; // Offset: 0x2AFCCC0 Flags: 0
+    #[unity::class_method(24)] pub fn set_is_visible(&self, value: bool); // Offset: 0x2AFCE80 Flags: 0
+    #[unity::class_method(100)] pub fn play_facial(&self, state_name: &Il2CppString); // Offset: 0x2B02AC0 Flags: 0
+    #[unity::class_method(108)] pub fn get_joint(&self) -> &'static mut CharacterJoint; // Offset: 0x2AFD0A0 Flags: 0
+    #[unity::class_method(109)] pub fn get_proportion(&self) -> &'static mut CharacterProportion; // Offset: 0x2B02A10 Flags: 0
+    #[unity::class_method(116)] pub fn get_builder(&self) -> &'static mut CharacterBuilder; // Offset: 0x2AFC680 Flags: 0
+    #[unity::class_method(124)] pub fn call_on_setup_done(&self, func: &Action); // Offset: 0x2AFE8E0 Flags: 0
+    #[unity::class_method(125)] pub fn call_on_setup_done2<T>(&self, component: &T, my_start: Option<&Action>, my_update: Option<&Action>, my_late_update: Option<&Action>) where T: UnityComponent; // Offset: 0x2AFE330 Flags: 0
 }
+impl UnityComponent for Character {}
+impl UnityObject for Character {}
 
 // Combat.Character$$get_Side	7102afc5a0	int32_t Combat.Character$$get_Side(Combat_Character_o * __this, MethodInfo * method)	8
+/*
 #[unity::from_offset("Combat", "Character", "get_Side")]
 pub fn character_get_side(this: &Character, method_info: OptionalMethod) -> i32;
+
+#[unity::from_offset("Combat", "Character", "get_GameStatus")]
+pub fn character_get_status(this: &Character, method_info: OptionalMethod) -> &'static mut CharacterGameStatus;
+
+#[unity::from_offset("Combat", "Character", "get_Builder")]
+fn character_get_builder(this: &Character, method_info: OptionalMethod) -> &'static mut CharacterBuilder;
+
+#[unity::from_offset("Combat", "CharacterAssetForm", "Build")]
+fn character_builder_build_hierarchy(this: &CharacterBuilder, appearance: Option<&CharacterAppearance>, invisble: bool, method_info: OptionalMethod);
+#[skyline::from_offset(0x2afe8e0)]
+fn character_call_on_setup_done(this: &Character, action: &Action, method_info: OptionalMethod);
+
+#[skyline::from_offset(0x2c46490)]
+fn character_builder_get_object(this: &CharacterBuilder, optional_method: OptionalMethod) -> &'static GameObject;
+*/
 
 #[unity::class("Combat", "CharacterSound")]
 pub struct CharacterSound { }
 
 #[unity::class("Combat", "Phase")]
 pub struct Phase {
-    i_dont_care: [u8; 0x10],
+    pub previous: Option<&'static mut Phase>,
+    pub next: Option<&'static mut Phase>,
     pub kind: i32,
     pub hit_type: HitType,
     pub detail: Detail,
@@ -79,7 +124,7 @@ pub struct Phase {
     pub damage_hash: i32,
 }
 
-bitflags::bitflags! {
+bitflags! {
     #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
     /// Bitflags for the type of hit. The combo flags (which are non-power of two) are provided by the game and included here for completeness.
     pub struct HitType: i32 {
@@ -98,7 +143,7 @@ bitflags::bitflags! {
     }
 }
 
-bitflags::bitflags! {
+bitflags! {
     #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
     /// Bitflags for the detail of the hit. The combo flags (which are non-power of two) are provided by the game and included here for completeness.
     pub struct Detail: i32 {
@@ -143,67 +188,56 @@ pub struct CharacterGameStatus {
     pub battle_x: i32,
     pub battle_y: i32,
     pub weapon: Option<&'static UnitItem>,
+    pub engage_style: i32,
     // too lazy to do the rest for now
 }
 impl CharacterGameStatus {
-    pub fn import(&self, side: i32, calc: &BattleCalculator, side_type: i32, map_distance: i32) {
-        unsafe {
-            combat_character_game_status_import(self, side, calc, side_type, map_distance, None);
-        }
+    #[unity::class_method(4)] pub fn set_emblem_identifier(&self, value: &Il2CppString); // Offset: 0x27DEF80 Flags: 0
+    #[unity::class_method(6)] pub fn get_unit(&self) -> Option<&'static mut Unit>; // Offset: 0x27DEFA0 Flags: 0
+    #[unity::class_method(63)] pub fn import(&self, side_: i32, calc: &BattleCalculator, side_type: BattleSideType, map_distance: i32); // Offset: 0x27E0880 Flags: 0
+    // pub fn import(&self, side: i32, calc: &BattleCalculator, side_type: i32, map_distance: i32) { unsafe { combat_character_game_status_import(self, side, calc, side_type, map_distance, None); } }
+}
+#[unity::class("Combat", "SkillStack")]
+pub struct SkillStack {}
+
+impl SkillStack{
+    pub fn has<'a>(&self, name: impl Into<&'a Il2CppString>) -> bool {
+        unsafe { combat_skill_stack_has(self, name.into(), None) }
     }
 }
+
+#[unity::class("Combat", "PhaseArray")]
+pub struct PhaseArray {
+    pub parent: ListFields<Phase>,
+}
+
 
 #[unity::class("Combat", "CombatRecord")]
 pub struct CombatRecord {
     pub is_enemy_attack: i32,
     pub combat_style: i32,
-    pub calculator: &'static BattleCalculator,
-    pub sim_calculator: &'static BattleCalculator,
+    pub calculator: &'static mut BattleCalculator,
+    pub sim_calculator: &'static mut BattleCalculator,
     pub game_status: &'static mut Array<&'static mut CharacterGameStatus>,
     pub chain_atk: &'static mut Array<&'static mut CharacterGameStatus>,
     pub dragonize: &'static mut Array<&'static mut CharacterGameStatus>,
-    location: *const u8,
-    passive_skills: *const u8,
-    phase_array: &'static Array<&'static Phase>,
+    location: u64,
+    pub passive_skills: &'static mut SkillStack,
+    pub phase_array: &'static mut PhaseArray,
     pub map_distance: i32,
     pub chain_attack_count: i32,
     pub finish_style: i32,
 }
 
-#[unity::class("Combat", "CharacterAppearance")]
-pub struct CharacterAppearance {
-    pub assets: &'static Array<CharacterAssetT>,
-    pub animset_names: &'static List<Il2CppString>,
-    pub acc_target: &'static Array<&'static Il2CppString>,
-    pub mask_color_100: Color,
-    pub mask_color_075: Color,
-    pub mask_color_050: Color,
-    pub mask_color_025: Color,
-    pub skin_color: Color,
-    pub grad_color: Color,
-    pub hair_color: Color,
-    pub toon_shadow_color: Color,
-    pub sound: AssetTableSound,
-    proporion: *const u8,
-    animset: *const u8,
-    weapon_style: i32,
+impl CombatRecord {
+    #[unity::class_method(5)] pub fn get_calculator(&self) -> &'static BattleCalculator; // Offset: 0x2922C10 Flags: 0
+    #[unity::class_method(11)] pub fn get_game_status_chain_atk(&self) -> &'static mut Array<&'static mut CharacterGameStatus>; // Offset: 0x2922C70 Flags: 0
+    #[unity::class_method(13)] pub fn get_game_status_dragonize(&self) -> &'static mut Array<&'static mut CharacterGameStatus>; // Offset: 0x2922C90 Flags: 0
+    #[unity::class_method(50)] pub fn import_from_game(&self, calc: &BattleCalculator, sim_calc: &BattleCalculator); // Offset: 0x2925900 Flags: 0
+    // pub fn get_calculator(&self) -> &'static mut BattleCalculator { unsafe { combatrecord_get_calculator(self, None) }
 }
 
-impl CharacterAppearance {
-    pub fn create_from_result(result: &AssetTableResult, distance: i32) -> &'static mut CharacterAppearance {
-        unsafe {
-            create_from_result(result, distance, None)
-        }
-    }
-}
 
-#[unity::class("Combat", "CharacterAsset")]
-pub struct CharacterAssetT {
-    pub asset_type: i32,
-    pub name: Option<&'static Il2CppString>,
-    pub addr_path: Option<&'static Il2CppString>,
-    //...
-}
 #[repr(C)]
 #[derive(Debug)]
 /// Used by the game to determine the sound effects to play during damage for zoomed-in combat.
@@ -258,6 +292,56 @@ pub struct MagicSignal {
     pub string_parameter: Option<&'static Il2CppString>,
 }
 
+#[unity::class("Combat", "AnimAsset")]
+pub struct AnimAsset {
+    pub asset_type: i32,
+    pub name: Option<&'static Il2CppString>,
+    pub addr_path: Option<&'static Il2CppString>,
+    other_fields: [u64; 3],
+    pub hash: i32,
+}
+impl AnimAsset {
+    pub fn new<'a>(name: impl Into<&'a Il2CppString>, hash: i32) -> &'static mut AnimAsset {
+        let asset = Self::instantiate().unwrap();
+        unsafe {
+            anim_asset_ctor(asset, None);
+            anim_asset_set_name_and_hash(asset, name.into(), hash, None);
+        }
+        asset
+    }
+}
+#[unity::class("Combat", "Side")]
+pub struct CombatSide {}
+impl CombatSide {
+    #[unity::class_method(0)] pub fn get_name(i: i32) -> &'static Il2CppString; // Offset: 0x247C130 Flags: 0
+    #[unity::class_method(1)] pub fn from_name(name: &Il2CppString) -> i32; // Offset: 0x247C6E0 Flags: 0
+    #[unity::class_method(2)] pub fn is_master(i: i32) -> bool; // Offset: 0x247CAD0 Flags: 0
+    #[unity::class_method(3)] pub fn is_paired_grandew(i: i32) -> bool; // Offset: 0x247CAE0 Flags: 0
+    #[unity::class_method(4)] pub fn is_chain(i: i32) -> bool; // Offset: 0x247CAF0 Flags: 0
+    #[unity::class_method(5)] pub fn is_chain_atk(i: i32) -> bool; // Offset: 0x247CB00 Flags: 0
+    #[unity::class_method(6)] pub fn is_chain_grd(i: i32) -> bool; // Offset: 0x247CB10 Flags: 0
+    #[unity::class_method(7)] pub fn is_player_side(i: i32) -> bool; // Offset: 0x247CB30 Flags: 0
+    #[unity::class_method(8)] pub fn is_enemy_side(i: i32) -> bool; // Offset: 0x247CB40 Flags: 0
+    #[unity::class_method(9)] pub fn get_enemy(i: i32) -> i32; // Offset: 0x247CB50 Flags: 0
+    #[unity::class_method(10)] pub fn get_enemy_grandew(i: i32) -> i32; // Offset: 0x247CB60 Flags: 0
+    #[unity::class_method(11)] pub fn get_grandew(i: i32) -> i32; // Offset: 0x247CB70 Flags: 0
+    #[unity::class_method(12)] pub fn get_master(i: i32) -> i32; // Offset: 0x247CB90 Flags: 0
+    #[unity::class_method(13)] pub fn get_partner(i: i32) -> i32; // Offset: 0x247CBB0 Flags: 0
+    #[unity::class_method(14)] pub fn get_mirror_side(i: i32) -> i32; // Offset: 0x247CBD0 Flags: 0
+    #[unity::class_method(15)] pub fn get_enemy_chr(i: i32) -> Option<&'static Character>; // Offset: 0x247CBF0 Flags: 0
+    #[unity::class_method(16)] pub fn get_grandew_chr(i: i32) -> Option<&'static Character>; // Offset: 0x247CC50 Flags: 0
+    #[unity::class_method(17)] pub fn get_master_chr(i: i32) -> Option<&'static Character>; // Offset: 0x247CCE0 Flags: 0
+    #[unity::class_method(18)] pub fn get_partner_chr(i: i32) ->Option<&'static Character>; // Offset: 0x247CD50 Flags: 0
+    #[unity::class_method(19)] pub fn get_enemy_grandew_chr(i: i32) -> Option<&'static Character>; // Offset: 0x247CDC0 Flags: 0
+    #[unity::class_method(20)] pub fn convert_from(side_type: BattleSideType, is_reversed: bool) -> i32; // Offset: 0x247CE20 Flags: 0
+}
+
+#[unity::from_offset("Combat", "AnimAsset", ".ctor")]
+fn anim_asset_ctor(this: &AnimAsset, method_info: OptionalMethod);
+
+#[unity::from_offset("Combat", "AnimAsset", "SetNameAndHash")]
+fn anim_asset_set_name_and_hash(this: &AnimAsset, name: &Il2CppString, hash: i32, method_info: OptionalMethod);
+
 // Combat.MagicSignalProcessor$$get_Magic	7101bf31a0	Combat_Magic_o * Combat.MagicSignalProcessor$$get_Magic(Combat_MagicSignalProcessor_o * __this, MethodInfo * method)	8
 #[unity::from_offset("Combat", "MagicSignalProcessor", "get_Magic")]
 pub fn magicsignalprocessor_get_magic(
@@ -285,6 +369,8 @@ pub fn runtimeanimutil_is_guard(hash: i32, method_info: OptionalMethod) -> bool;
 
 #[unity::from_offset("Combat", "Phase", "get_IsCritical")]
 pub fn phase_get_is_critical(this: &Phase, method_info: OptionalMethod) -> bool;
+
+
 
 //Combat.Phase$$IsDeadSomeone	7101f2abe0	bool Combat.Phase$$IsDeadSomeone(Combat_Phase_o * __this, MethodInfo * method)	136
 #[unity::from_offset("Combat", "Phase", "IsDeadSomeone")]
@@ -334,8 +420,16 @@ pub fn side_is_master(i: i32, method_info: OptionalMethod) -> bool;
 #[unity::from_offset("Combat", "Side", "IsChainAtk")]
 pub fn side_is_chain_atk(i: i32, method_info: OptionalMethod) -> bool;
 
+#[skyline::from_offset(0x2940b90)]
+fn combat_skill_stack_has(ss: &SkillStack, name: &Il2CppString, optional_method: OptionalMethod) -> bool;
+
+/*
 #[skyline::from_offset(0x027e0880)]
 fn combat_character_game_status_import(this:&CharacterGameStatus, side: i32, calc: &BattleCalculator, side_type: i32, distance: i32, method_info: OptionalMethod);
 
-#[skyline::from_offset(0x02b0ed80)]
-fn create_from_result(result: &AssetTableResult, map_distance: i32, method_info: OptionalMethod) -> &'static mut CharacterAppearance;
+
+
+#[unity::from_offset("Combat", "CombatRecord", "get_Calculator")]
+fn combatrecord_get_calculator(this: &CombatRecord, method_info: OptionalMethod) -> &'static mut BattleCalculator;
+
+ */

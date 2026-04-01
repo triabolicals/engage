@@ -1,12 +1,17 @@
 use unity::prelude::*;
+use unity::il2cpp::object::Array;
+use crate::unit::Unit;
 
-use crate::gamedata::unit::Unit;
-
+#[unity::class("App", "MapPos")]
+pub struct MapPos {
+  pub x: i32,
+  pub y: i32,
+}
 #[unity::class("App", "MapImage")]
 pub struct MapImage {
   junk: [u8;0x10],
   name:  &'static Il2CppString,
-  unit: &'static (),
+  pub unit: &'static MapImageUnit,
   pub terrain: &'static MapImageTerrain,
   cost: &'static(),
   danger: &'static(),
@@ -30,9 +35,22 @@ pub struct MapImage {
   pub playarea_z2: i32,
 }
 
+
+
+
 impl MapImage {
   pub fn get_target_unit(&self, x: i32, y: i32) -> Option<&Unit> {
     unsafe { mapimage_get_target_unit(self, x, y, None) }
+  }
+}
+#[unity::class("App", "MapImageUnit")]
+pub struct MapImageUnit{
+  parent: [u8; 8],
+  pub cells: &'static Array<MapPosFields>,
+}
+impl MapImageUnit {
+  pub fn get_unit(&self, x: i32, z: i32) -> Option<&Unit> {
+    unsafe { mapimage_unit_get_unit(self, x, z, None) }
   }
 }
 
@@ -54,3 +72,6 @@ pub struct MapImageCore { }
 
 #[unity::from_offset("App", "MapImage", "GetTargetUnit")]
 extern "C" fn mapimage_get_target_unit(this: &MapImage, x: i32, y: i32, method_info: OptionalMethod) -> Option<&Unit>;
+
+#[unity::from_offset("App", "MapImageUnit", "GetUnit")]
+fn mapimage_unit_get_unit(this: &MapImageUnit, x: i32, z: i32, method_info: OptionalMethod) -> Option<&Unit>;

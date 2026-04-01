@@ -41,9 +41,21 @@ pub fn get_instance_monobehaviour<T: unity::prelude::Il2CppClassData>() -> &'sta
 
     get_instance(Some(&pointer[5]))
 }
+pub fn try_get_instance_monobehaviour<T: unity::prelude::Il2CppClassData>() -> Option<&'static mut T> {
+    let idk = get_generic_class!(SingletonMonoBehaviour<T>).unwrap();
+    let pointer = unsafe {
+        &*(idk.rgctx_data as *const Il2CppRGCTXData as *const u8 as *const [&'static MethodInfo; 6])
+    };
+    let get_instance = unsafe {
+        std::mem::transmute::<_, extern "C" fn(OptionalMethod) -> Option<&'static mut T>>(
+            pointer[3].method_ptr,
+        )
+    };
+    get_instance(Some(&pointer[5]))
+}
 
 pub fn get_singleton_proc_instance<T: unity::prelude::Il2CppClassData>() -> Option<&'static mut T> {
-    let idk = get_generic_class!(SingletonProcInst<T>).unwrap();
+    let idk = get_generic_class!(SingletonProcInstClass<T>).unwrap();
 
     let pointer = unsafe {
         &*(idk.rgctx_data as *const il2cpp::class::Il2CppRGCTXData as *const u8 as *const [&'static MethodInfo; 6])
@@ -62,3 +74,4 @@ pub fn get_singleton_scriptable_object<T: unity::prelude::Il2CppClassData>() -> 
     let idk = get_generic_class!(SingletonScriptableObject<T>).unwrap();
     idk.get_static_fields_mut::<Option<&mut T>>()
 }
+

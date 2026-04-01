@@ -1,12 +1,40 @@
-use std::result;
-
+use std::ops::{Deref, DerefMut};
+use num_derive::FromPrimitive;
 pub use unity::prelude::*;
 pub use unity::engine::Color;
+use unity::il2cpp::object::Array;
 pub use unity::system::*;
 use crate::bit::*;
-use super::{*, unit::*, item::ItemData};
+use crate::gamedata::god::GodData;
+use crate::gamedata::item::ItemData;
+use crate::gamedata::job::JobData;
+use crate::gamedata::person::PersonData;
+use crate::gamedata::{Gamedata, StructBaseFields};
+use crate::god::GodUnit;
+use crate::unit::Unit;
+
+#[repr(i32)]
+#[derive(PartialOrd, PartialEq, Eq, Clone, Copy, FromPrimitive, Ord)]
+pub enum AssetTableStates {
+    None = 0, // Attr: 17
+    Engaging = 1, // Attr: 17
+    EngageAttack = 2, // Attr: 17
+    EngageLinkAttackMain = 3, // Attr: 17
+    EngageLinkAttackSub = 4, // Attr: 17
+}
+
+#[repr(i32)]
+#[derive(PartialOrd, PartialEq, Eq, Clone, Copy, FromPrimitive, Ord)]
+pub enum AssetTableModes {
+    Common = 0, // Attr: 17
+    OnMap = 1, // Attr: 17
+    Combat = 2, // Attr: 17
+    GMap = 3, // Attr: 17
+    Num = 4, // Attr: 17
+}
 
 #[unity::class("App", "AssetTable")]
+#[static_fields(AssetTableStaticFields)]
 pub struct AssetTable {
     pub parent: StructBaseFields,
     pub preset_name: Option<&'static Il2CppString>,
@@ -29,6 +57,8 @@ pub struct AssetTable {
     pub talk_anim: Option<&'static Il2CppString>,
     pub demo_anim: Option<&'static Il2CppString>,
     pub hub_anim: Option<&'static Il2CppString>,
+    pub colors: [u8; 24],
+    /*
     pub hair_r: u8,
     pub hair_g: u8,
     pub hair_b: u8,
@@ -53,6 +83,7 @@ pub struct AssetTable {
     pub mask_color_025_r: u8,
     pub mask_color_025_g: u8,
     pub mask_color_025_b: u8,
+     */
     pub unity_colors: [Color; 8],
     pub accessories: [&'static mut AssetTableAccessory; 8],
     pub accessory_list: &'static AssetTableAccessoryList,
@@ -70,20 +101,47 @@ impl AssetTable {
     pub fn add_condition_key<'a>(key: impl Into<&'a Il2CppString>) {
         Self::class().get_static_fields::<AssetTableStaticFields>().condition_flags.add_by_key(key.into());
     }
+    #[unity::class_method(157)] pub fn get_condition_names() -> &'static List<&'static Il2CppString>; // Offset: 0x211D240 Flags: 0
+    #[unity::class_method(158)] pub fn get_condition_hits() -> &'static List2<i32>; // Offset: 0x211D2B0 Flags: 0
+    // #[unity::class_method(158)] pub fn get_condition_hits() -> &'static SimpleList<i32>; // Offset: 0x211D2B0 Flags: 0
+    #[unity::class_method(160)] pub fn has_color(color: Color) -> bool; // Offset: 0x211D450 Flags: 0
 }
 
-#[unity::class("App", "AsssetTable.ConditionFlags")]
+#[unity::class("", "ConditionFlags")]
+#[nested_from_type(AssetTable)]
 pub struct AssetTableConditionFlags {
-    pub bits: BitStructFields,
+    pub bits: BitStruct,
     pub keys: &'static List<Il2CppString>,
-    pub hits: &'static SimpleList<i32>,
+    pub hits: &'static List2<i32>,
+    //pub hits: &'static SimpleList<i32>,
     pub dic: &'static Dictionary<'static, &'static Il2CppString, i32>,
-
 }
 
 impl AssetTableConditionFlags {
-    pub fn add_by_key<'a>(&self, key: impl Into<&'a Il2CppString>) { unsafe { condition_add_by_key(self, key.into(), None);}  }
-    pub fn add_unit(&self, unit: &Unit ) { unsafe { condition_add_unit(self, unit, None);}  }
+    pub fn add_by_key<'a>(&self, key: impl Into<&'a Il2CppString>) { self.add_by_key_(key.into()); }
+
+
+    #[unity::class_method(3)] pub fn clear(&self); // Offset: 0x1BAFA50 Flags: 0
+    #[unity::class_method(4)] pub fn test(&self, index: i32) -> bool; // Offset: 0x1BAFC20 Flags: 0
+    #[unity::class_method(5)] pub fn test2(&self, key: &Il2CppString) -> bool; // Offset: 0x1BAFC70 Flags: 0
+    #[unity::class_method(7)] pub fn add_by_key_(&self, key: &Il2CppString); // Offset: 0x1BAFDD0 Flags: 0
+    #[unity::class_method(8)] pub fn add_item(&self, item: &ItemData); // Offset: 0x1BAFF70 Flags: 0
+    #[unity::class_method(10)] pub fn get_state(unit: &Unit) -> AssetTableStates; // Offset: 0x1BB0100 Flags: 0
+    #[unity::class_method(11)] pub fn add_unit(&self, unit: &Unit); // Offset: 0x1BB0200 Flags: 0
+    /*
+    #[unity::class_method(6)] pub fn add_keys(&self, keys: &Array<&Il2CppString>); // Offset: 0x1BAFCD0 Flags: 0
+    #[unity::class_method(9)] pub fn add4(&self, force: ForceType); // Offset: 0x1BB0070 Flags: 0
+    #[unity::class_method(12)] pub fn is_simple_mode(&self) -> bool; // Offset: 0x1BB07A0 Flags: 0
+    #[unity::class_method(13)] pub fn add_gender(&self, gender: Gender, dress_gender: Gender); // Offset: 0x1BB07B0 Flags: 0
+    #[unity::class_method(14)] pub fn add_gender_from_person(&self, person: &PersonData); // Offset: 0x1BB0900 Flags: 0
+    #[unity::class_method(15)] pub fn add_gender_from_unit(&self, unit: &Unit); // Offset: 0x1BB0D60 Flags: 0
+    #[unity::class_method(16)] pub fn add_gender_god_data(&self, goid_data: &GodData); // Offset: 0x1BB10F0 Flags: 0
+    #[unity::class_method(17)] pub fn add_person_job(&self, person: &PersonData, job: &JobData); // Offset: 0x1BB13F0 Flags: 0
+    #[unity::class_method(18)] pub fn add(&self, person: &PersonData, job: &JobData, force: ForceType); // Offset: 0x1BB1410 Flags: 0
+    #[unity::class_method(19)] pub fn add_skills(&self, skills: &SkillArray); // Offset: 0x1BB1710 Flags: 0
+    #[unity::class_method(20)] pub fn add9(&self, state: AssetTableStates, god_data: &GodData, is_darkness: bool); // Offset: 0x1BB0440 Flags: 0
+    #[unity::class_method(21)] pub fn replace_gid2_eid(&self, gid: &Il2CppString) -> &'static Il2CppString; // Offset: 0x1BB1930 Flags: 0
+     */
 }
 
 #[repr(C)]
@@ -108,23 +166,24 @@ impl AssetTableStaticFields {
     }
 }
 
-
+#[repr(C)]
 pub struct AssetTableSound {
     pub voice: Option<&'static Il2CppString>,
     pub footstep: Option<&'static Il2CppString>,
     pub material: Option<&'static Il2CppString>,
 }
 
-#[unity::class("App", "AssetTable.Result")]
+#[unity::class("", "Result")]
+#[nested_from_type(AssetTable)]
 pub struct AssetTableResult {
-    pub pid: &'static Il2CppString,
-    pub jid: &'static Il2CppString,
+    pub pid: Option<&'static Il2CppString>,
+    pub jid: Option<&'static Il2CppString>,
     pub body_model: &'static Il2CppString,
     pub dress_model: &'static Il2CppString,
     pub head_model: &'static Il2CppString,
     pub hair_model: &'static Il2CppString,
-    pub ride_model: &'static Il2CppString,
-    pub ride_dress_model: &'static Il2CppString,
+    pub ride_model: Option<&'static Il2CppString>,
+    pub ride_dress_model: Option<&'static Il2CppString>,
     pub left_hand: &'static Il2CppString,
     pub right_hand: &'static Il2CppString,
     pub trail: &'static Il2CppString,
@@ -145,90 +204,94 @@ pub struct AssetTableResult {
     pub accessory_list: &'static mut AssetTableAccessoryList,
     pub accessory_dictionary: &'static Dictionary<'static, &'static Il2CppString, &'static AssetTableAccessory>,
 }
-
 impl AssetTableResult {
-    pub fn get_from_pid<'a>(mode: i32, pid: impl Into<&'a Il2CppString>, conditions: &Array<&Il2CppString>) -> &'static mut AssetTableResult { 
-        unsafe { result_get_from_pid(mode, pid.into(), conditions, None) } 
+    pub fn get_anim(&mut self, idx: i32) -> Option<&mut &'static Il2CppString> {
+        match idx {
+            0 => self.info_anims.as_mut(),
+            1 => self.talk_anims.as_mut(),
+            2 => self.demo_anims.as_mut(),
+            3 => self.hub_anims.as_mut(),
+            _ => None,
+        }
     }
-    /// Generates a new result from GodUnit
-    /// 
-    /// Calls setup_from_god
-    pub fn get_from_god_unit(mode: i32, god_unit: &GodUnit, conditions: &Array<&Il2CppString>) -> &'static mut AssetTableResult {
-        unsafe { result_get_from_god(mode, god_unit, conditions, None) }
-    }
-    /// Generates a new result from an AssetTable Preset 
-    /// 
-    /// Used for Epharim in Twin Strike Engage Attack
-    pub fn get_from_preset<'a>(name: impl Into<&'a Il2CppString>) -> &'static mut AssetTableResult {
-        unsafe { asset_table_result_get_preset_name(name.into(), None) }
-    }
+    pub fn get_from_pid<'a>(mode: i32, pid: impl Into<&'a Il2CppString>, conditions: &Array<&Il2CppString>) -> &'static mut AssetTableResult { Self::get_from_pid_(mode, pid.into(), conditions) }
 
-    pub fn commit_asset_table(&self, data: &AssetTable) { unsafe { asset_table_commit_result(self, data, None); } }
+    #[unity::class_method(88)] pub fn ctor(&self); // Offset: 0x1BB22C0 Flags: 0
+    #[unity::class_method(89)] pub fn setup_for_unit(&self, mode: i32, unit: &Unit, equipped: Option<&ItemData>, conditions: &Array<&Il2CppString>) -> &'static mut AssetTableResult; // Offset: 0x1BB2430 Flags: 0
+    #[unity::class_method(90)] pub fn setup_for_god(&self, mode: i32, god_data: Option<&GodData>, is_darkness: bool, conditions: &Array<&Il2CppString>) -> &'static mut AssetTableResult; // Offset: 0x1BB2D80 Flags: 0
+    #[unity::class_method(91)] pub fn setup_for_asset_table(&self, data: &AssetTable) -> &'static mut AssetTableResult; // Offset: 0x1BB2E90 Flags: 0
+    #[unity::class_method(92)] pub fn setup_for_person(&self, mode: i32, person: Option<&PersonData>, conditions: &Array<&Il2CppString>) -> &'static mut AssetTableResult; // Offset: 0x1BB4180 Flags: 0
+    #[unity::class_method(93)] pub fn setup_for_person_job_item(&self, mode: i32, person: Option<&PersonData>, job: Option<&JobData>, equipped: Option<&ItemData>, conditions: &Array<&Il2CppString>) -> &'static mut AssetTableResult; // Offset: 0x1BB4290 Flags: 0
+    // #[unity::class_method(94)] pub fn setup6(&self, mode: i32, person: &PersonData, job: &JobData, god: &GodData, equipped: &ItemData, force: i32, state: i32, is_darkness: bool, conditions: &Array<String>) -> &'static mut AssetTableResult; // Offset: 0x1BB43A0 Flags: 0
+    #[unity::class_method(95)] pub fn commit_mode(&self, mode: i32); // Offset: 0x1BB44D0 Flags: 0
+    #[unity::class_method(96)] pub fn commit(&self, mode: i32, person: Option<&PersonData>, job: Option<&JobData>, equipped: Option<&ItemData>); // Offset: 0x1BB2A80 Flags: 0
+    #[unity::class_method(97)] pub fn commit_god(&self, mode: i32, god_data: &GodData); // Offset: 0x1BB2E60 Flags: 0
+    #[unity::class_method(98)] pub fn commit_asset_table(&self, data: &AssetTable); // Offset: 0x1BB2EE0 Flags: 0
 
-    pub fn setup_for_person(&self, mode: i32, person: Option<&PersonData>, conditions: &Array<&Il2CppString>) -> &'static mut AssetTableResult {
-        unsafe { result_setup_for_person(self, mode, person, conditions, None) }
-    }
+    #[unity::class_method(102)] pub fn commit_accessory(&self, accessory: &AssetTableAccessory); // Offset: 0x1BB48B0 Flags: 0
+    #[unity::class_method(103)] pub fn replace(&self, mode: i32); // Offset: 0x1BB3BE0 Flags: 0
+    #[unity::class_method(106)] pub fn clear(&self); // Offset: 0x1BB2750 Flags: 0
 
-    /// Clears the current result and generates the result from PersonData
-    /// 
-    /// Used in Dragonstone transformation
-    /// 
-    /// Returns itself
-    pub fn setup_for_person_job_item(&self, mode: i32, person: Option<&PersonData>,  job: Option<&JobData>, equipped: Option<&ItemData>, conditions: &Array<&Il2CppString>) -> &'static mut AssetTableResult {
-        unsafe { asset_table_result_setup_person(self, mode, person, job, equipped, conditions, None) }
-    }
-    /// Clears the current result and generates the result from GodData
-    /// 
-    /// Used for Emblem UnitInfo / Emblem Kizuna / Emblem Hub
-    /// 
-    /// Returns itself
-    pub fn setup_for_god(&self, mode: i32, god: Option<&GodData>, is_darkness: bool,  conditions: &Array<&Il2CppString>) ->  &'static mut AssetTableResult {
-        unsafe { asset_table_result_god_setup(self, mode, god, is_darkness, conditions, None)}
-    }
-    
-    /// Clears the current result and generate the result from Unit and equipped items
-    /// Used in Combat/Hub/UnitInfo 
-    /// Return itself
-    pub fn setup_for_unit(&self, mode: i32, unit: Option<&Unit>, equipped: Option<&ItemData>, conditions: &Array<&Il2CppString>) -> &'static mut AssetTableResult {
-        unsafe { result_setup_from_unit(self, mode, unit, equipped, conditions, None) }
-    }
-    pub fn clear(&self) { unsafe { result_clear(self, None) } }
-    pub fn commit(&self, mode: i32, person: Option<&PersonData>, job: Option<&JobData>, equipped: Option<&ItemData>) { unsafe { result_commit(self, mode, person, job, equipped, None); }}
-    pub fn commit_accessory(&self, accessory: &AssetTableAccessory) { unsafe { result_commit_accessory(self, accessory, None); }}
-    pub fn commit_mode(&self, mode: i32) { unsafe { result_commit_mode(self, mode, None);}}
-    pub fn replace(&self, mode: i32) { unsafe { result_replace(self, mode, None);}}
+    #[unity::class_method(114)] pub fn get_hash_code(&self) -> i32; // Offset: 0x1BB4FA0 Flags: 0
+
+    #[unity::class_method(116)] pub fn get_for_talk_pid(pid: &Il2CppString) -> &'static mut AssetTableResult; // Offset: 0x1BB5A90 Flags: 0
+    #[unity::class_method(117)] pub fn get_for_talk_unit(unit: &Unit) -> &'static mut AssetTableResult; // Offset: 0x1BB5CF0 Flags: 0
+    #[unity::class_method(118)] pub fn get_for_demo(pid: &Il2CppString, is_default: bool, is_plain: bool) -> &'static mut AssetTableResult; // Offset: 0x1BB5F60 Flags: 0
+    #[unity::class_method(119)] pub fn get_kizuna_condition(conditions: &Array<&Il2CppString>) -> &'static Array<&'static Il2CppString>; // Offset: 0x1BB62E0 Flags: 0
+    #[unity::class_method(120)] pub fn get_for_kizuna(pid: &Il2CppString, conditions: &Array<&Il2CppString>) -> &'static mut AssetTableResult; // Offset: 0x1BB63C0 Flags: 0
+    #[unity::class_method(121)] pub fn get_hub_condition(conditions: &Array<&Il2CppString>) -> &'static Array<&'static Il2CppString>; // Offset: 0x1BB6560 Flags: 0
+    #[unity::class_method(122)] pub fn get_for_hub(pid: &Il2CppString, conditions: &Array<&Il2CppString>) -> &'static mut AssetTableResult; // Offset: 0x1BB6660 Flags: 0
+    // #[unity::class_method(123)] pub fn get_for_hub_direct(pid: &Il2CppString, condisions: &Array<String>) -> &'static mut AssetTableResult; // Offset: 0x1BB6800 Flags: 0
+    #[unity::class_method(124)] pub fn get_for_accessory(unit: &Unit) -> &'static mut AssetTableResult; // Offset: 0x1BB68B0 Flags: 0
+    #[unity::class_method(125)] pub fn get_from_unit(mode: i32, unit: &Unit, conditions: &Array<&Il2CppString>) -> &'static mut AssetTableResult; // Offset: 0x1BB6AF0 Flags: 0
+    #[unity::class_method(126)] pub fn get_from_unit_item(mode: i32, unit: &Unit, equipped: Option<&ItemData>, conditions: &Array<&Il2CppString>) -> &'static mut AssetTableResult; // Offset: 0x1BB5ED0 Flags: 0
+    #[unity::class_method(127)] pub fn get_for_unit_info(unit: &Unit) -> &'static mut AssetTableResult; // Offset: 0x1BB6BC0 Flags: 0
+    #[unity::class_method(128)] pub fn get_for_unit_info_item(unit: &Unit, equipped: Option<&ItemData>) -> &'static mut AssetTableResult; // Offset: 0x1BB6C50 Flags: 0
+    #[unity::class_method(129)] pub fn get_for_unit_info_god(god_data: &GodData, is_darkness: bool) -> &'static mut AssetTableResult; // Offset: 0x1BB6DE0 Flags: 0
+    #[unity::class_method(130)] pub fn get_for_unit_info_god_unit(god_unit: &GodUnit) -> &'static mut AssetTableResult; // Offset: 0x1BB7010 Flags: 0
+    #[unity::class_method(131)] pub fn get_for_unit_hub(unit: &Unit) -> &'static mut AssetTableResult; // Offset: 0x1BB70A0 Flags: 0
+    #[unity::class_method(132)] pub fn get_for_talk_god(god_data: &GodData) -> &'static mut AssetTableResult; // Offset: 0x1BB7270 Flags: 0
+    #[unity::class_method(133)] pub fn get_for_talk_god_unit(god_unit: &GodUnit) -> &'static mut AssetTableResult; // Offset: 0x1BB7400 Flags: 0
+    #[unity::class_method(134)] pub fn get_for_demo_god(god_data: &GodData) -> &'static mut AssetTableResult; // Offset: 0x1BB7600 Flags: 0
+    #[unity::class_method(135)] pub fn get_for_hub_god(god_data: &GodData) -> &'static mut AssetTableResult; // Offset: 0x1BB77F0 Flags: 0
+    #[unity::class_method(136)] pub fn get_from_god_unit(mode: i32, god_unit: &GodUnit, conditions: &Array<&Il2CppString>) -> &'static mut AssetTableResult; // Offset: 0x1BB7980 Flags: 0
+    #[unity::class_method(137)] pub fn get_from_god_data(mode: i32, god_data: &GodData, is_darkness: bool, conditions: &Array<&Il2CppString>) -> &'static mut AssetTableResult; // Offset: 0x1BB6F80 Flags: 0
+    // #[unity::class_method(138)] pub fn get_from_item(mode: i32, item: &ItemData) -> &'static mut AssetTableResult; // Offset: 0x1BB7A60 Flags: 0
+    // #[unity::class_method(139)] pub fn get_from_shop(mode: i32, item: &ItemData) -> &'static mut AssetTableResult; // Offset: 0x1BB7B90 Flags: 0
+    #[unity::class_method(140)] pub fn get_from_preset(name: &Il2CppString) -> &'static mut AssetTableResult; // Offset: 0x1BB7CA0 Flags: 0
+    #[unity::class_method(144)] pub fn get_from_pid_(mode: i32, pid: &Il2CppString, conditions: &Array<&Il2CppString>) -> &'static mut AssetTableResult; // Offset: 0x1BB5BE0 Flags: 0
 }
 
-
-#[unity::class("AssetTable", "Accessory")]
+#[unity::class("", "Accessory")]
+#[nested_from_type(AssetTable)]
 pub struct AssetTableAccessory {
     pub locator: Option<&'static Il2CppString>,
     pub model: Option<&'static Il2CppString>, 
 }
-impl AssetTableAccessory {
-    pub fn to_string(&self) -> &'static Il2CppString { unsafe { accessory_to_string(self, None)}}
-}
-#[unity::class("AssetTable", "ConditionIndexes")]
+
+#[unity::class("", "ConditionIndexes")]
+#[nested_from_type(AssetTable)]
 pub struct AssetTableConditionIndexes {
-    pub list: &'static mut List<SimpleList<i32>>,
+    pub list: &'static mut List2<&'static mut List2<i32>>,
+    //pub list: &'static mut List<SimpleList<i32>>,
+}
+impl AssetTableConditionIndexes {
+    #[unity::class_method(0)] pub fn clear(&self); // Offset: 0x1BB1A00 Flags: 0
+    #[unity::class_method(3)] pub fn test(&self, flags: &AssetTableConditionFlags) -> bool; // Offset: 0x1BB1AD0 Flags: 0
+    pub fn has_condition_index(&self, index: i32) -> bool { self.list.iter().map(|x| x.iter()).flatten().any(|x| *x == index) }
 }
 
-#[unity::class("AssetTable", "AccessoryList")]
+#[unity::class("", "AccessoryList")]
+#[nested_from_type(AssetTable)]
 pub struct AssetTableAccessoryList {
     pub list: ListFields<AssetTableAccessory>,
 }
 
 impl AssetTableAccessoryList {
-    pub fn try_add(&self, accessory: &AssetTableAccessory) { unsafe { accessory_list_try_add(self, accessory, None)}}
-    pub fn clear(&self) {
-        if let Some(class) = AssetTable::class().get_nested_types().iter().find(|x| x.get_name() == "AccessoryList") {
-            let method = class.get_virtual_method("Clear").unwrap();
-            let clear = unsafe { std::mem::transmute::<_, extern "C" fn(&Self, &MethodInfo)>(method.method_ptr) };
-            clear(self, method.method_info);
-        }
-    }
+    #[unity::class_method(0)] pub fn try_add(&self, accessory: &AssetTableAccessory); // Offset: 0x1BAF640 Flags: 0
+    #[unity::class_method(12, vtable)] pub fn clear(&self); // Offset: 0x3DE9950 Flags: 2
 }
-// non reference list
+/*
 #[repr(C)]
 #[unity::class("System.Collections.Generic", "List`1")]
 pub struct SimpleList<T: 'static> {
@@ -240,16 +303,12 @@ pub struct SimpleList<T: 'static> {
 
 impl<T: 'static> Deref for SimpleListFields<T> {
     type Target = [T];
-
-    fn deref(&self) -> &Self::Target {
-        unsafe { std::slice::from_raw_parts(self.items.m_items.as_ptr(), self.size as usize) }
-    }
+    fn deref(&self) -> &Self::Target { unsafe { std::slice::from_raw_parts(self.items.m_items.as_ptr(), self.size as usize) } }
 }
 
 impl<T: 'static> DerefMut for SimpleListFields<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         unsafe { std::slice::from_raw_parts_mut(self.items.m_items.as_mut_ptr(), self.size as usize) }
-
     }
 }
 
@@ -305,68 +364,4 @@ impl<T> SimpleList<T> {
     }
 }
 
-#[unity::from_offset("App","AssetTable", "set_Conditions")]
-fn asset_table_set_conditions(this: &AssetTable, value: &Array<&Il2CppString>, method_info: OptionalMethod);
-
-#[unity::from_offset("App","AssetTable", "set_Conditions")]
-fn asset_table_mut_set_conditions(this: &mut AssetTable, value: &Array<&Il2CppString>, method_info: OptionalMethod);
-
-#[unity::from_offset("App","AssetTable", "get_Conditions")]
-fn asset_table_get_conditions(this: &AssetTable, method_info: OptionalMethod) -> &'static mut Array<&'static Il2CppString>;
-
-#[unity::from_offset("App","AssetTable", ".ctor")]
-fn asset_table_ctor(this: &AssetTable, method_info: OptionalMethod);
-
-#[unity::from_offset("App","AssetTable", ".cctor")]
-fn asset_table_cctor( method_info: OptionalMethod);
-
-#[skyline::from_offset(0x01bafdd0)]
-fn condition_add_by_key(condition: &AssetTableConditionFlags, key: &Il2CppString, method_info: OptionalMethod);
-
-#[skyline::from_offset(0x01bb0200)]
-fn condition_add_unit(condition: &AssetTableConditionFlags, unit: &Unit, method_info: OptionalMethod);
-
-#[skyline::from_offset(0x01bb7980)]
-fn result_get_from_god(mode: i32, god_unit: &GodUnit, conditions: &Array<&Il2CppString>, method_info: OptionalMethod) -> &'static mut AssetTableResult;
-
-#[skyline::from_offset(0x01bb5be0)]
-fn result_get_from_pid(mode: i32, pid: &Il2CppString, conditions: &Array<&Il2CppString>, method_info: OptionalMethod) -> &'static mut AssetTableResult;
-
-#[skyline::from_offset(0x01bb4180)]
-fn result_setup_for_person(this: &AssetTableResult, mode: i32, person: Option<&PersonData>, conditions: &Array<&Il2CppString>, method_info: OptionalMethod) -> &'static mut AssetTableResult;
-
-#[skyline::from_offset(0x01bb2430)]
-fn result_setup_from_unit(this: &AssetTableResult, mode: i32, unit: Option<&Unit>, equipped: Option<&ItemData>, conditions: &Array<&Il2CppString>, method_info: OptionalMethod) -> &'static mut AssetTableResult;
-
-#[skyline::from_offset(0x01bb4290)]
-fn asset_table_result_setup_person(this: &AssetTableResult, mode: i32, person: Option<&PersonData>, job: Option<&JobData>, equipped: Option<&ItemData>, conditions: &Array<&Il2CppString>, method_info: OptionalMethod) -> &'static mut AssetTableResult;
-
-#[skyline::from_offset(0x01bb2d80)]
-fn asset_table_result_god_setup(this: &AssetTableResult, mode: i32, god_data: Option<&GodData>, is_darkness: bool, conditions: &Array<&Il2CppString>, method_info: OptionalMethod) -> &'static mut AssetTableResult;
-
-#[skyline::from_offset(0x01bb44d0)]
-fn result_commit_mode(this: &AssetTableResult, mode: i32, method_info: OptionalMethod);
-
-#[skyline::from_offset(0x01bb7ca0)]
-fn asset_table_result_get_preset_name(preset_name: &Il2CppString, method_info: OptionalMethod) -> &'static mut AssetTableResult;
-
-#[skyline::from_offset(0x01bb2ee0)]
-fn asset_table_commit_result(this: &AssetTableResult, data: &AssetTable, method_info: OptionalMethod);
-
-#[skyline::from_offset(0x01bb2a80)]
-fn result_commit(this: &AssetTableResult, mode: i32, person: Option<&PersonData>, job:  Option<&JobData>, equipped: Option<&ItemData>, method_info: OptionalMethod);
-
-#[skyline::from_offset(0x01bb48b0)]
-fn result_commit_accessory(this: &AssetTableResult, accessory: &AssetTableAccessory, method_info: OptionalMethod);
-
-#[skyline::from_offset(0x01bb2750)]
-fn result_clear(this: &AssetTableResult, method_info: OptionalMethod);
-
-#[skyline::from_offset(0x01bb3be0)]
-fn result_replace(this: &AssetTableResult, mode: i32, method_info: OptionalMethod);
-
-#[skyline::from_offset(0x01baf640)]
-fn accessory_list_try_add(this: &AssetTableAccessoryList, accessory: &AssetTableAccessory, method_info: OptionalMethod);
-
-#[skyline::from_offset(0x01baf5a0)]
-fn accessory_to_string(accessory: &AssetTableAccessory, method_info: OptionalMethod) -> &'static Il2CppString;
+ */

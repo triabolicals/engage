@@ -1,7 +1,9 @@
 use num_derive::{FromPrimitive, ToPrimitive};
 pub use unity::prelude::*;
 
-use crate::{gamedata::unit::Unit, proc::{Bindable, ProcInstFields}};
+use crate::{unit::Unit, proc::{Bindable, ProcInstFields}};
+use crate::util::get_singleton_proc_instance;
+
 #[repr(i32)]
 #[derive(PartialEq, Clone, FromPrimitive, ToPrimitive)]
 pub enum MapSequenceHumanLabel {
@@ -59,7 +61,6 @@ pub enum MapSequenceHumanLabel {
     DirectAttack = 51,
     End = 52,
 }
-#[repr(C)]
 #[unity::class("App", "MapSequenceHuman")]
 pub struct MapSequenceHuman {
     pub proc: ProcInstFields,
@@ -81,7 +82,7 @@ pub struct MapSequenceHuman {
     is_enemy_attack_range: bool,
     is_update_support_skill: bool,
     update_support_skill_unit: Option<&'static Unit>,
-    operate_mode: i32,
+    operate_mode: MapSequenceHumanOperateMode,
 }
 
 impl Bindable for MapSequenceHuman { }
@@ -96,4 +97,18 @@ impl AsMut<ProcInstFields> for MapSequenceHuman {
     fn as_mut(&mut self) -> &mut ProcInstFields {
         &mut self.proc
     }
+}
+
+impl MapSequenceHuman {
+    pub const HASH: i32 = 1525873615;
+    pub fn get_instance() -> Option<&'static mut Self> { get_singleton_proc_instance::<Self>() }
+}
+
+#[repr(i32)]
+#[derive(Copy, Clone, PartialEq, Eq)]
+pub enum MapSequenceHumanOperateMode {
+    None = 0, // Attr: 17
+    Direct = 1, // Attr: 17
+    Indirect = 2, // Attr: 17
+    Designate = 3, // Attr: 17
 }

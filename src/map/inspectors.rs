@@ -1,13 +1,13 @@
-use std::iter::Map;
-
+use num_derive::FromPrimitive;
 use unity::prelude::*;
 use unity::system::List;
 use crate::script::DynValue;
 use crate::util::get_instance;
 use unity::il2cpp::object::Array;
+use crate::unit::Unit;
 
 #[repr(i32)]
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(PartialOrd, PartialEq, Eq, Clone, Copy, FromPrimitive, Ord)]
 pub enum MapInspectorKind {
 	None = 0,
 	Turn = 1,   //TurnCommon
@@ -52,11 +52,22 @@ pub struct MapInspectors {
 }
 
 impl MapInspectors {
+    pub fn try_create<T: Inspector>(x: i32, z: i32, w: i32, h: i32) -> &'static mut T {
+        let method = MapInspectors::class().get_methods()[18];
+        let generic = get_generic_method!(method<T>);
+        let try_create = unsafe { std::mem::transmute::<_, fn(i32, i32, i32, i32, &MethodInfo) -> &'static mut T>(generic.method_ptr) };
+        try_create(x, z, w, h, generic)
+    }
     pub fn get_instance() -> &'static mut MapInspectors { get_instance::<Self>() }
     pub fn add<T: Inspector>(inspector: &T) { unsafe { mapinspectors_add(inspector, None); } }
     pub fn get_kind_inspectors<T: Inspector>(kind: MapInspectorKind) -> Option<&'static mut List<T>> { 
         unsafe { std::mem::transmute( mapinspectors_get_kind(kind, None) ) }
     }
+    #[unity::class_method(11)] pub fn is_enable_at_position(kind: MapInspectorKind, x: i32, z: i32) -> bool; // Offset: 0x1DE7480 Flags: 0
+    #[unity::class_method(12)] pub fn is_enable_unit(kind: MapInspectorKind, unit: &Unit) -> bool; // Offset: 0x1DE7570 Flags: 0
+    #[unity::class_method(13)] pub fn is_enable_unit_position(kind: MapInspectorKind, x: i32, z: i32, unit: &Unit) -> bool; // Offset: 0x1DE7690 Flags: 0
+    #[unity::class_method(14)] pub fn is_enable_units(kind: MapInspectorKind, from: &Unit, to: &Unit) -> bool; // Offset: 0x1DE77C0 Flags: 0
+    #[unity::class_method(15)] pub fn find_breakable(x: i32, z: i32) -> Option<&'static PokeInspector>; // Offset: 0x1DE7910 Flags: 0
 }
 
 /// Base MapInspector Class
@@ -76,8 +87,12 @@ impl MapInspector {
     pub fn cast_mut<T: Inspector>(&mut self) -> &mut T {
         unsafe { std::mem::transmute::<&mut MapInspector, &mut T>(self) }
     }
+
+
 }
-pub trait Inspector: Il2CppClassData + Sized {}
+pub trait Inspector: Il2CppClassData + Sized {
+    #[unity::class_method(37, MapInspector)] fn set_function(&mut self, value: &DynValue);
+}
 
 /// Area (4)
 #[unity::class("App", "AreaInspector")]
@@ -161,6 +176,11 @@ pub struct InterruptInspector {
     pub command: i32,
 }
 impl Inspector for InterruptInspector {}
+
+#[unity::class("App", "TboxInspector")]
+pub struct TboxInspector {}
+
+impl Inspector for TboxInspector {}
 
 #[unity::from_offset("App", "MapInspectors", "Add")]
 fn mapinspectors_add<T: Inspector>(inspector: &T, method_info: OptionalMethod);

@@ -1,8 +1,11 @@
-use unity::prelude::*;
+use super::*;
 use crate::{
     proc::{ProcInstFields, Bindable},
-    gamedata::{item::ItemData, JobData, WeaponMask, unit::Unit},
+    gamedata::{item::ItemData, job::JobData, WeaponMask},
+    unit::Unit,
 };
+use crate::battle::BattleInfoSide;
+use crate::menu::menus::class_change::ClassChangeJobData;
 
 #[unity::class("App", "UnitGrowSequence")]
 pub struct UnitGrowSequence {
@@ -19,18 +22,24 @@ pub struct UnitGrowSequence {
     pub class_change_weapon: Option<&'static ItemData>,
 }
 impl Bindable for UnitGrowSequence {}
-
-impl UnitGrowSequence {
-    pub fn create_bind<P: Bindable>(proc: &P) -> &'static UnitGrowSequence { unsafe { unitgrowsequence_create_bind(proc, None) } }
-    pub fn set_unit_grow_data(&self, unit: &Unit, exp: i32, sp: i32, is_talk: bool) {
-        unsafe { unitgrowsequence_set_unit_grow_data(self, unit, exp, sp, is_talk, None) }
+impl AsMut<ProcInstFields> for UnitGrowSequence {
+    fn as_mut(&mut self) -> &mut ProcInstFields {
+        &mut self.proc
     }
 }
-
-
-
-#[unity::from_offset("App", "UnitGrowSequence", "CreateBind")]
-fn unitgrowsequence_create_bind<P: Bindable>(proc: &P, method_info: OptionalMethod) -> &'static UnitGrowSequence;
-
-#[skyline::from_offset(0x01f7ea40)]
-fn unitgrowsequence_set_unit_grow_data(this: &UnitGrowSequence, unit: &Unit, exp: i32, sp: i32, is_talk: bool, method_info: OptionalMethod);
+impl UnitGrowSequence {
+    pub const HASH: i32 = -813168385;
+    #[unity::class_method(2)] pub fn set_unit_grow_data(&self, unit: &Unit, exp: i32, skill_point: i32, is_talk: bool);
+    #[unity::class_method(0)] pub fn set_unit_grow_data2(&self, side: &BattleInfoSide, is_talk: bool); // Offset: 0x1F7E970 Flags: 0
+    #[unity::class_method(1)] pub fn set_unit_grow_data3(&self, unit: &Unit, exp: i32); // Offset: 0x1F7EA90 Flags: 0
+    #[unity::class_method(3)] pub fn set_unit_class_change(&self, unit: &Unit, job: &JobData, item: &ItemData); // Offset: 0x1F7EAF0 Flags: 0
+    #[unity::class_method(4)] pub fn set_unit_class_change2(&self, unit: &Unit, data: &ClassChangeJobData); // Offset: 0x1F7EB60 Flags: 0
+    #[unity::class_method(5)] pub fn create_bind<B>(proc: &B) -> &'static UnitGrowSequence where B: Bindable; // Offset: 0x1F7EBC0 Flags: 0
+    #[unity::class_method(6)] pub fn prepare(&self); // Offset: 0x1F7F210 Flags: 0
+    #[unity::class_method(7)] pub fn gain_exp(&self); // Offset: 0x1F7F360 Flags: 0
+    #[unity::class_method(8)] pub fn check_level_up(&self); // Offset: 0x1F7F3C0 Flags: 0
+    #[unity::class_method(9)] pub fn level_up(&self); // Offset: 0x1F7F450 Flags: 0
+    #[unity::class_method(10)] pub fn check_class_change(&self); // Offset: 0x1F7F4F0 Flags: 0
+    #[unity::class_method(11)] pub fn class_change(&self); // Offset: 0x1F7F580 Flags: 0
+    #[unity::class_method(12)] pub fn set_weapon(&self); // Offset: 0x1F7FB70 Flags: 0
+}

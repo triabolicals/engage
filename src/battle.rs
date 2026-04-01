@@ -61,7 +61,8 @@ pub struct BattleInfoSide {
 pub struct BattleInfo {}
 
 impl BattleInfo {
-    #[unity::class_method(105)] pub fn get_unit(&self) -> Option<&'static mut Unit>; // Offset: 0x1E8B250 Flags: 0
+    #[unity::class_method(53)] pub fn get_side(&self, side: BattleSideType) -> Option<&'static mut BattleInfoSide>; // Offset: 0x1E7F210 Flags: 0
+    #[unity::class_method(59)] pub fn get_unit(&self, side: BattleSideType) -> Option<&'static mut Unit>; // Offset: 0x1E7F750 Flags: 0
 }
 #[unity::class("App", "BattleCalculator")]
 pub struct BattleCalculator {

@@ -265,7 +265,7 @@ impl<T> StructDataArrayListFields<T> {
 
 pub trait GamedataArray: Il2CppClassData + Sized {
     fn try_get_mut<'a>(array_name: impl Into<&'a Il2CppString>) -> Option<&'static mut StructDataArrayList<Self>>{
-        Self::try_get_mut(array_name.into())
+        Self::try_get_mut_(array_name.into())
     }
     #[unity::class_method("Load")] fn load();
     #[unity::class_method("OnCompletedEnd")] fn on_completed_end(&self);

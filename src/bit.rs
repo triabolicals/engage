@@ -1,8 +1,6 @@
 use unity::il2cpp::object::Array;
 use unity::prelude::*;
 use unity::system::SystemType;
-
-#[unity::class("App", "BitStruct")] pub struct BitStructClass {}
 #[repr(C)]
 pub struct BitStruct{ pub bits: &'static mut Array<u8>, }
 
@@ -10,7 +8,7 @@ impl BitStruct {
     pub fn set(&mut self, index: i32, enable: bool) {
         let i = (index >> 3) as usize;
         if i < self.bits.len() {
-            if enable { self.bits[i] |= (1 << (index & 7)); }
+            if enable { self.bits[i] |= 1 << (index & 7); }
             else { self.bits[i] &= !(1 << (index & 7)); }
         }
     }

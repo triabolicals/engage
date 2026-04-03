@@ -212,10 +212,10 @@ pub trait ConfigBasicMenuItemSwitchMethods {
     extern "C" fn custom_call(this: &mut ConfigBasicMenuItem, method_info: OptionalMethod) -> BasicMenuResult;
     extern "C" fn set_command_text(this: &mut ConfigBasicMenuItem, method_info: OptionalMethod);
     extern "C" fn set_help_text(this: &mut ConfigBasicMenuItem, method_info: OptionalMethod);
-    extern "C" fn a_call(_this: &mut ConfigBasicMenuItem, method_info: OptionalMethod) -> BasicMenuResult {
+    extern "C" fn a_call(_this: &mut ConfigBasicMenuItem, _method_info: OptionalMethod) -> BasicMenuResult {
         BasicMenuResult::new()
     }
-    extern "C" fn build_attributes(_this: &mut ConfigBasicMenuItem, method_info: OptionalMethod) -> BasicMenuItemAttribute {
+    extern "C" fn build_attributes(_this: &mut ConfigBasicMenuItem, _method_info: OptionalMethod) -> BasicMenuItemAttribute {
         BasicMenuItemAttribute::Enable
     }
 }
@@ -238,10 +238,10 @@ pub trait ConfigBasicMenuItemCommandMethods {
         this.is_arrow = false;
         ConfigBasicMenuItem::on_deselect(this);
     }
-    extern "C" fn a_call(this: &mut ConfigBasicMenuItem, method_info: OptionalMethod) -> BasicMenuResult {
+    extern "C" fn a_call(_this: &mut ConfigBasicMenuItem, _method_info: OptionalMethod) -> BasicMenuResult {
         BasicMenuResult::new()
     }
-    extern "C" fn build_attributes(this: &mut ConfigBasicMenuItem, method_info: OptionalMethod) -> BasicMenuItemAttribute {
+    extern "C" fn build_attributes(_this: &mut ConfigBasicMenuItem, _method_info: OptionalMethod) -> BasicMenuItemAttribute {
         BasicMenuItemAttribute::Enable
     }
 }
@@ -259,10 +259,10 @@ pub trait ConfigBasicMenuItemGaugeMethods {
 
     extern "C" fn custom_call(this: &mut ConfigBasicMenuItem, method_info: OptionalMethod) -> BasicMenuResult;
     extern "C" fn set_help_text(this: &mut ConfigBasicMenuItem, method_info: OptionalMethod);
-    extern "C" fn a_call(this: &mut ConfigBasicMenuItem, method_info: OptionalMethod) -> BasicMenuResult {
+    extern "C" fn a_call(_this: &mut ConfigBasicMenuItem, _method_info: OptionalMethod) -> BasicMenuResult {
         BasicMenuResult::new()
     }
-    extern "C" fn build_attributes(this: &mut ConfigBasicMenuItem, method_info: OptionalMethod) -> BasicMenuItemAttribute {
+    extern "C" fn build_attributes(_this: &mut ConfigBasicMenuItem, _method_info: OptionalMethod) -> BasicMenuItemAttribute {
         BasicMenuItemAttribute::Enable
     }
 }

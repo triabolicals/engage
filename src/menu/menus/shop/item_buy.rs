@@ -1,4 +1,4 @@
-use unity::engine::{Color, MonoBehaviorFields};
+use unity::engine::Color;
 use unity::il2cpp::object::Array;
 use unity::prelude::*;
 use unity::system::List;
@@ -12,7 +12,7 @@ use crate::menu::menus::unit_item::{UnitItemMenu, UnitItemMenuContent};
 use crate::proc::{Bindable, ProcInst, ProcInstFields};
 use crate::tmpro::TextMeshProUGUI;
 use crate::unit::{Unit, UnitItem};
-use crate::unityengine::{GameObject, UnityComponent};
+use crate::unityengine::{MonoBehaviorFields, GameObject, UnityComponent};
 
 #[unity::class("App", "ItemShopBuyRoot")]
 pub struct ItemShopBuyRoot {

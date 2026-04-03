@@ -2,14 +2,12 @@ use num_derive::FromPrimitive;
 use unity::il2cpp::object::Array;
 use unity::prelude::*;
 use crate::gamedata::chapter::ChapterData;
-use super::*;
 
 #[unity::class("App", "UnitRecord")]
 pub struct UnitRecord {
     pub values: &'static mut Array<i32>,
 }
 impl UnitRecord {
-    const VERSION: i32 = 4;
     #[unity::class_method(5)] pub fn get(&self, kind: UnitRecordKinds) -> i32; // Offset: 0x1C56D60 Flags: 0
     #[unity::class_method(6)] pub fn set(&self, kind: UnitRecordKinds, value: i32); // Offset: 0x1C56DA0 Flags: 0
     #[unity::class_method(7)] pub fn add(&self, kind: UnitRecordKinds, value: i32); // Offset: 0x1C56DE0 Flags: 0

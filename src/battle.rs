@@ -1,12 +1,6 @@
-use unity::il2cpp::object::Array;
 use unity::prelude::*;
 use crate::gamedata::{terrain::TerrainData, WeaponMask, skill::SkillArray};
-use crate::unit::{Unit, UnitItem};
-
-#[unity::class("App", "CapabilityInt")]
-pub struct CapabilityInt {
-    pub data: &'static mut Array<i32>,
-}
+use crate::unit::{CapabilityInt, Unit, UnitItem};
 
 #[unity::class("App", "BattleDetail")]
 pub struct BattleDetail {
@@ -15,7 +9,6 @@ pub struct BattleDetail {
 
 #[unity::class("App", "BattleInfoSide")]
 pub struct BattleInfoSide {
-    //junk : [u8; 0x48],
     info: &'static mut BattleInfo,
     pub side_type : i32,
     __ : i32,

@@ -1,4 +1,3 @@
-use unity::engine::MonoBehaviorFields;
 use unity::engine::ui::Image;
 use unity::il2cpp::object::Array;
 use unity::prelude::*;
@@ -8,7 +7,7 @@ use crate::menu::menu_item::accessory::AccessoryMenuItem;
 use crate::tmpro::TextMeshProUGUI;
 use crate::unit::Unit;
 use super::*;
-use crate::unityengine::{GameObject, UnityComponent};
+use crate::unityengine::{MonoBehaviorFields, GameObject, UnityComponent};
 
 #[unity::class("App", "AccessoryShopChangeMenuContent")]
 #[static_fields(AccessoryShopChangeMenuContentStaticFields)]

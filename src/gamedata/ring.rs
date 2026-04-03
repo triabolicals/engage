@@ -3,7 +3,7 @@ use unity::il2cpp::object::Array;
 use unity::prelude::*;
 
 use crate::gamedata::{Gamedata, StructBaseFields, skill::SkillArray};
-use crate::unit::{CapabilitySbyte, Unit};
+use crate::unit::CapabilitySbyte;
 
 #[unity::class("App", "RingData")]
 pub struct RingData {

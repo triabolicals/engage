@@ -1,6 +1,4 @@
 //! Utilities to be used with the [`get_generic_class!`](unity::get_generic_class) macro.
-use unity::{il2cpp::class::Il2CppRGCTXData, prelude::*};
-use unity::il2cpp::class::{make_generic, make_generic_type};
 
 #[repr(C)]
 #[unity::class("App", "SingletonProcInst`1")]

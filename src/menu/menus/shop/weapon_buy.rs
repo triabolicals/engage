@@ -1,4 +1,4 @@
-use unity::engine::{Color, MonoBehaviorFields};
+use unity::engine::Color;
 use unity::engine::ui::Image;
 use unity::il2cpp::object::Array;
 use unity::prelude::*;
@@ -9,12 +9,12 @@ use crate::impl_action_handlers;
 use crate::menu::{BasicMenu, BasicMenuSelect};
 use crate::menu::content::BasicMenuContent;
 use crate::menu::content::common::ShopContent;
-use crate::menu::menu_item::{BasicMenuItem, BasicMenuItemContentFields, MenuItem, MenuItemContent};
+use crate::menu::menu_item::{BasicMenuItemContentFields, MenuItem, MenuItemContent};
 use crate::menu::menus::unit_item::{UnitItemMenu, UnitItemMenuContent};
-use crate::proc::{ProcInst, ProcInstFields};
+use crate::proc::{Bindable, ProcInst, ProcInstFields};
 use crate::tmpro::TextMeshProUGUI;
 use crate::unit::{Unit, UnitItem};
-use crate::unityengine::{GameObject, UnityComponent};
+use crate::unityengine::{MonoBehaviorFields, GameObject, UnityComponent};
 
 #[unity::class("App", "WeaponShopBuyRoot")]
 pub struct WeaponShopBuyRoot {
@@ -84,7 +84,7 @@ pub struct WeaponShopBuyMenu {
 impl WeaponShopBuyMenu {
     #[unity::class_method(3)] pub fn rebuild_menu(&self, keep_select: bool, setup_shopdata: bool); // Offset: 0x21CBF60 Flags: 0
 }
-crate::impl_menu_class!(WeaponShopBuyMenu);
+impl Bindable for WeaponShopBuyMenu {}
 impl_action_handlers!([WeaponShopBuyMenu, "RequestCloseEventHandler", WeaponShopBuyRequestCloseHandler],);
 impl_action_handlers!([WeaponShopBuyMenu, "SelectEventHandler", WeaponShopBuySelectHandler], unit_item: &UnitItem);
 impl_action_handlers!([WeaponShopBuyMenu, "ChangeUnitToNextEventHandler", WeaponShopBuyChangeUnitNextHandler],unit_item: &UnitItem);

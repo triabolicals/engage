@@ -1,7 +1,7 @@
 use num_derive::FromPrimitive;
 use unity::prelude::*;
 use crate::gamedata::god::GodData;
-use crate::unit::{Gender, Unit};
+use crate::unit::Unit;
 use super::{Gamedata, StructBaseFields};
 
 #[repr(i32)]

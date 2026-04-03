@@ -12,6 +12,21 @@ pub mod yesno;
 pub mod shopyesno;
 pub mod exchangeyesno;
 
+pub trait DialogMenuItem: Sized {
+    fn ctor<'a>(&self, text: impl Into<&'a Il2CppString>) {
+        unsafe { dialog_item_ctor2(self, text.into(), None) }
+    }
+    fn ctor_with_mess<'a>(&self, text: impl Into<&'a Il2CppString>) {
+        unsafe { dialog_item_ctor2(self, Mess::get(text), None) }
+    }
+    fn cast(&self) -> &'static BasicDialogItem {
+        unsafe { std::mem::transmute::<&Self, &'static BasicDialogItem>(self) }
+    }
+    fn cast_mut(&mut self) -> &'static mut BasicDialogItem {
+        unsafe { std::mem::transmute::<&mut Self, &'static mut BasicDialogItem>(self) }
+    }
+}
+
 #[unity::class("App", "BasicDialog")]
 pub struct BasicDialog2 {
     parent: BasicMenuFields<BasicDialogItem>,
@@ -26,8 +41,7 @@ impl BasicDialog2 {
     }
     #[unity::class_method(6)] pub fn set_text_(&self, text: &Il2CppString); // Offset: 0x2453D90 Flags: 0
     #[unity::class_method(10)]
-    pub fn create_basic_dialog_bind<B>(proc: &B, menu_item_list: &List<BasicDialogItem>) -> &'static mut BasicDialog2
-    where B: Bindable;
+    pub fn create_basic_dialog_bind<B>(proc: &B, menu_item_list: &List<BasicDialogItem>) -> &'static mut BasicDialog2 where B: Bindable;
     pub fn create_bind<B: Bindable>(proc: &B,
         text: &Il2CppString,
         yes_text: &Il2CppString,
@@ -98,27 +112,12 @@ pub struct BasicDialogItem {
 impl BasicDialogItem {
     pub fn new(text: impl AsRef<str>) -> &'static mut BasicDialogItem {
         let item = BasicDialogItem::instantiate().unwrap();
-        unsafe {
-            dialog_item_ctor(item, text.into(), None);
-        }
+        unsafe { dialog_item_ctor(item, text.into(), None); }
         item
     }
 }
 
-pub trait DialogMenuItem: Sized {
-    fn ctor<'a>(&self, text: impl Into<&'a Il2CppString>) {
-        unsafe { dialog_item_ctor2(self, text.into(), None) }
-    }
-    fn ctor_with_mess<'a>(&self, text: impl Into<&'a Il2CppString>) {
-        unsafe { dialog_item_ctor2(self, Mess::get(text), None) }
-    }
-    fn cast(&self) -> &'static BasicDialogItem {
-        unsafe { std::mem::transmute::<&Self, &'static BasicDialogItem>(self) }
-    }
-    fn cast_mut(&mut self) -> &'static mut BasicDialogItem {
-        unsafe { std::mem::transmute::<&mut Self, &'static mut BasicDialogItem>(self) }
-    }
-}
+
 
 #[unity::class("App", "YesMenuItem")]
 pub struct YesMenuItem {

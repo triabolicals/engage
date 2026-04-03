@@ -1,4 +1,4 @@
-use unity::engine::{Vector3, Vector2, Rect, MonoBehaviorFields, Material};
+use unity::engine::{Vector3, Vector2, Material};
 use unity::il2cpp::object::Array;
 use unity::prelude::*;
 use unity::system::SystemType;
@@ -96,6 +96,9 @@ pub fn animationevent_get_stringparameter(this: *const u8, method_info: Optional
 
 #[unity::class("UnityEngine", "Object")]
 pub struct Object { pub cache_ptr: *const u8, }
+
+#[unity::class("UnityEngine", "MonoBehavior")]
+pub struct MonoBehavior { ptr: *const u8, }
 
 pub trait UnityObject: Il2CppClassData + Sized {
     fn find_objects(include_inactive: bool) -> &'static Array<&'static mut Self> {

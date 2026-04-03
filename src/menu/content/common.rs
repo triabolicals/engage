@@ -1,8 +1,7 @@
-use unity::engine::MonoBehaviorFields;
 use unity::engine::ui::Image;
 use unity::prelude::Il2CppString;
 use crate::tmpro::TextMeshProUGUI;
-use crate::unityengine::GameObject;
+use crate::unityengine::{MonoBehaviorFields, GameObject};
 
 #[unity::class("App", "UnitMenuItemSetter")]
 pub struct UnitMenuItemSetter {

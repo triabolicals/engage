@@ -5,7 +5,6 @@ use crate::impl_action_handlers;
 use crate::menu::{
     *, content::accessory::*,
     menu_item::{
-        MenuItemContent,
         accessory::{AccessoryMenuItem, AccessoryMenuItemDecideHandler, AccessoryMenuItemSelectHandler}
     },
 };
@@ -42,7 +41,7 @@ pub struct AccessoryShopChangeMenu {
     pub request_close: Option<&'static mut AccessoryShopChangeMenuRequestCloseHandler>,
     pub change_kind: Option<&'static mut AccessoryShopChangeMenuChangeKindHandler>,
 }
-crate::impl_menu_class!(AccessoryShopChangeMenu);
+impl Bindable for AccessoryShopChangeMenu {}
 impl_action_handlers!([AccessoryShopChangeMenu, "RequestCloseEventHandler", AccessoryShopChangeMenuRequestCloseHandler],);
 impl_action_handlers!([AccessoryShopChangeMenu, "ChangeKindEventHandler", AccessoryShopChangeMenuChangeKindHandler], data: &AccessoryData);
 

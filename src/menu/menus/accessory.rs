@@ -1,8 +1,7 @@
 use unity::prelude::*;
-use unity::engine::MonoBehaviorFields;
 use crate::menu::content::AccessoryEquipmentInfo;
 use crate::tmpro::TextMeshProUGUI;
-use crate::unityengine::{GameObject, UnityComponent};
+use crate::unityengine::{MonoBehaviorFields, GameObject, UnityComponent};
 use crate::menu::menus::shop::shopunitselect::ShopUnitSelectMenuDecideHandler;
 
 pub mod change;

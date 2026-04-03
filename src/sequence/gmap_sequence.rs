@@ -1,5 +1,4 @@
-use super::*;
-use crate::{gmapspotmanager::gmap_spot_manager_open_next_chapters, proc::Bindable};
+use crate::proc::{Bindable, ProcInstFields};
 use unity::{system::List, prelude::*};
 use crate::gamedata::chapter::ChapterData;
 use crate::util::get_singleton_proc_instance;

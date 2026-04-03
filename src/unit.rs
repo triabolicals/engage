@@ -24,6 +24,7 @@ mod items;
 mod pool;
 mod ring;
 mod ai;
+mod reliance;
 
 pub use record::*;
 pub use edit::*;
@@ -37,6 +38,7 @@ pub use items::*;
 pub use ai::*;
 pub use ring::*;
 pub use pool::*;
+pub use reliance::*;
 
 
 use crate::god::*;

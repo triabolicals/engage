@@ -16,7 +16,7 @@ impl GameSound {
         Self::post_event_(event_name.into(), character)
     }
     pub fn is_event_loaded<'a>(event_name: impl Into<&'a Il2CppString>) -> bool {
-        Self::is_event_loaded(event_name.into())
+        Self::is_event_loaded_(event_name.into())
     }
     #[unity::class_method(2)]  pub fn is_enable() -> bool; // Offset: 0x2287150 Flags: 0
     #[unity::class_method(34)] pub fn is_event_loaded_(event_name: &Il2CppString) -> bool; // Offset: 0x2289000 Flags: 0
@@ -167,14 +167,6 @@ pub enum GameSoundFadeSpeedType {
     Slow = 4, // Attr: 17
     VerySlow = 5, // Attr: 17
 }
-/*
-#[skyline::from_offset(0x2272fd0)]
-extern "C" fn gamesound_postevent(event_name: &Il2CppString, character: Option<&Character>, method_info: OptionalMethod) -> *const u8;
-
-#[unity::from_offset("App", "GameSound", "IsEventLoaded")]
-extern "C" fn gamesound_iseventloaded(event_name: &Il2CppString, method_info: OptionalMethod) -> bool;
-
- */
 #[skyline::from_offset(0x1e6db20)]
 extern "C" fn gamesound_handle_ctor(this: &GameSoundHandle, sound_handle: &SoundSystemSoundHandle, method_info: OptionalMethod);
 

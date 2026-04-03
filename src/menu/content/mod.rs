@@ -1,8 +1,8 @@
-use unity::engine::{Color, Material, MonoBehaviorFields, Vector2, Vector3};
+use unity::engine::{Color, Material, Vector2, Vector3};
 use unity::prelude::*;
 use crate::menu::BasicMenu;
 use crate::menu::menu_item::{BasicMenuItem, MenuItem};
-use crate::unityengine::{Animator, GameObject, RectTransform, UnityComponent};
+use crate::unityengine::{MonoBehaviorFields, Animator, GameObject, RectTransform, UnityComponent};
 
 pub mod accessory;
 pub mod common;

@@ -1,8 +1,10 @@
 //! Structures representing a singular entry from the gamedata files in memory.
 
 use std::ops::Deref;
-use unity::{prelude::*, system::{List, ListFields}};
+use unity::{prelude::*, system::{Dictionary, List, ListFields}};
 use unity::il2cpp::object::Array;
+use std::ops::DerefMut;
+use crate::ut::Ut;
 
 pub mod accessory;
 pub mod person;
@@ -23,7 +25,7 @@ pub mod music;
 pub mod chapter;
 pub mod hub;
 pub mod reward;
-mod anim_db;
+pub mod anim_db;
 
 pub use god::GodData;
 pub use job::JobData;
@@ -70,10 +72,7 @@ impl<T> Deref for StructListFields<T> {
         &self.list
     }
 }
-use std::ops::DerefMut;
-use unity::system::{Dictionary, List2Fields, ListVirtual};
-use crate::gamedata::skill::{SkillArray, SkillData};
-use crate::ut::Ut;
+
 
 impl<T> DerefMut for StructListFields<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
@@ -121,20 +120,10 @@ pub struct StructDictionary {
     pub hash_key: &'static mut Dictionary<'static, i32, i32>,
 }
 impl StructDictionary {
-    /*
-    #[unity::class_method(0)] pub fn clear(&self); 
-    #[unity::class_method(1)] pub fn get_public_names(&self) -> &'static Array<String>; 
-    #[unity::class_method(2)] pub fn get_key(&self, index: i32) -> &'static Il2CppString; 
-    #[unity::class_method(3)] pub fn get_index(&self, key: &Il2CppString) -> i32; 
-    #[unity::class_method(4)] pub fn get_index_from_hash(&self, hash: i32) -> i32; 
-
-     */
     #[unity::class_method(5)] pub fn is_exist(&self) -> bool; 
-    #[unity::class_method(6)] pub fn key_exists(&self, key: &Il2CppString) -> bool; 
-    // #[unity::class_method(7)] pub fn prefixless(key: &Il2CppString) -> &'static Il2CppString; 
+    #[unity::class_method(6)] pub fn key_exists(&self, key: &Il2CppString) -> bool;
     #[unity::class_method(8)] pub fn add(&self, key: &Il2CppString, index: i32); 
-    #[unity::class_method(9)] pub fn add_with_hash(&self, key: &Il2CppString, index: i32, hash: i32); 
-    // #[unity::class_method(10)] pub fn get_list(&self) -> List<&'static Il2CppString>; 
+    #[unity::class_method(9)] pub fn add_with_hash(&self, key: &Il2CppString, index: i32, hash: i32);
 }
 
 #[unity::class("App", "WeaponMask")]
@@ -166,6 +155,7 @@ pub trait Gamedata: Il2CppClassData + Sized {
         let klass = get_generic_class!(StructTemplate<Self>).unwrap();
         klass.get_static_fields_mut::<StructTemplateStaticFields>().dictionary
     }
+    /// Method to add game data. Must have an ID that isn't already used.
     fn add(new: &'static mut Self){
         let dictionary = Self::get_dictionary();
         let struct_base = unsafe { std::mem::transmute::<&mut Self, &mut StructBase>(new) };
@@ -194,18 +184,17 @@ pub struct StructDataArray {
 /// List that contains all the arrays/groups of the StructDataArray gamedata
 #[unity::class("App", "StructArrayList`1")]
 pub struct StructArrayList<T: 'static> {
-    pub parent: List2Fields<&'static mut StructDataArrayList<T>>,
+    pub parent: ListFields<StructDataArrayList<T>>,
 }
 
 impl<T> Deref for StructArrayListFields<T> {
-    type Target = List2Fields<&'static mut StructDataArrayList<T>>;
+    type Target = ListFields<StructDataArrayList<T>>;
     fn deref(&self) -> &Self::Target { &self.parent }
 }
 
 impl<T> DerefMut for StructArrayListFields<T> {
     fn deref_mut(&mut self) -> &mut Self::Target { &mut self.parent }
 }
-
 
 #[unity::class("App", "StructDataArrayList`1")] pub struct StructDataArrayListClass {}
 
@@ -272,101 +261,14 @@ pub trait GamedataArray: Il2CppClassData + Sized {
     #[unity::class_method("OnCompleted")] fn on_completed(&self);
     #[unity::class_method("OnBuild")] fn on_build(&self);
     #[unity::class_method(0, StructDataArray)] fn get_array_name(&self) -> &'static Il2CppString; 
-    #[unity::class_method(1, StructDataArray)] fn set_array_name(&self, value: &Il2CppString); 
-    // #[unity::class_method(2, StructDataArray)] fn get_array_list() -> &'static StructArrayList<Self>; 
+    #[unity::class_method(1, StructDataArray)] fn set_array_name(&self, value: &Il2CppString);
     #[unity::class_method(7, StructDataArray)] fn add_array_list(list: &StructDataArrayList<Self>); 
     #[unity::class_method(8, StructDataArray)] fn completed(); 
-    #[unity::class_method(9, StructDataArray)] fn unload(); 
-    // #[unity::class_method(10)] fn get(name: &Il2CppString) -> StructDataArrayList<T>; 
+    #[unity::class_method(9, StructDataArray)] fn unload();
     #[unity::class_method(12, StructDataArray)] fn try_get_mut_(name: &Il2CppString) -> Option<&'static mut StructDataArrayList<Self>>; 
     #[unity::class_method(14, StructDataArray)] fn try_get_from_hash(array_hash: i32) -> Option<&'static StructDataArrayList<Self>>; 
-    #[unity::class_method(17, StructDataArray)] fn get_count() -> i32; 
-    #[unity::class_method(18, StructDataArray)] fn get_list() -> Option<&'static StructArrayList<Self>>; 
-    #[unity::class_method(18, StructDataArray)] fn get_list_mut() -> Option<&'static mut StructArrayList<Self>>; 
-
-    /*
-    fn get_list_mut() -> Option<&'static mut List<StructDataArrayList<Self>>> {
-        let mut method = Self::class()._1.parent.get_methods().iter().find(|method| method.get_name() == Some(String::from("GetList")));
-        if method.is_none() {
-            method = Self::class()._1.parent._1.parent.get_methods().iter().find(|method| method.get_name() == Some(String::from("GetList")));
-        }
-        let get_list = unsafe {
-            std::mem::transmute::<_, extern "C" fn(&MethodInfo) -> Option<&'static mut List<StructDataArrayList<Self>>>>(
-                method.unwrap().method_ptr,
-            )
-        };
-        get_list(method.unwrap())
-    }
-    fn get_list() -> Option<&'static List<StructDataArrayList<Self>>> {
-        let mut method = Self::class()._1.parent.get_methods().iter().find(|method| method.get_name() == Some(String::from("GetList")));
-        if method.is_none() {
-            method = Self::class()._1.parent._1.parent.get_methods().iter().find(|method| method.get_name() == Some(String::from("GetList")));
-        }
-        let get_list = unsafe {
-            std::mem::transmute::<_, extern "C" fn(&MethodInfo) -> Option<&'static List<StructDataArrayList<Self>>>>(
-                method.unwrap().method_ptr,
-            )
-        };
-        get_list(method.unwrap())
-    }
-    fn try_get_mut<'a>(name: impl Into<&'a Il2CppString>) -> Option<&'static mut StructDataArrayList<Self>> {
-        let mut method = Self::class()._1.parent.get_methods().iter().find(|method| method.get_name() == Some(String::from("TryGet")));
-        if method.is_none() {
-            method = Self::class()._1.parent._1.parent.get_methods().iter().find(|method| method.get_name() == Some(String::from("TryGet")));
-        }
-        if method.is_none() { return None; }
-        let get = unsafe {
-            std::mem::transmute::<_, extern "C" fn(&Il2CppString, &MethodInfo) -> Option<&'static mut StructDataArrayList<Self>>> (
-                method.unwrap().method_ptr,
-            )
-        };
-        get(name.into(), method.unwrap())
-    }
-    fn unload() {
-        let mut method = Self::class()._1.parent.get_methods().iter().find(|method| method.get_name() == Some(String::from("Unload")));
-        if method.is_none() {
-            method = Self::class()._1.parent._1.parent.get_methods().iter().find(|method| method.get_name() == Some(String::from("Unload")));
-        }
-        if method.is_none() { return; }
-        let unload = unsafe {
-            std::mem::transmute::<_, extern "C" fn(&MethodInfo) -> ()> ( method.unwrap().method_ptr, )
-        };
-        unload(method.unwrap());
-    }
-    fn load() {
-        let method = Self::class().get_methods().iter().find(|method| method.get_name() == Some(String::from("Load")));
-        if method.is_none() { return; }
-        let load = unsafe { std::mem::transmute::<_, extern "C" fn(&MethodInfo) -> ()> ( method.unwrap().method_ptr, )  };
-        load(method.unwrap());
-    }
-
-    fn on_completed(&self) {
-        let mut method = Self::class().get_methods().iter().find(|method| method.get_name() == Some(String::from("OnCompleted")));
-        if method.is_none() {
-            method = Self::class()._1.parent.get_methods().iter().find(|method| method.get_name() == Some(String::from("OnCompleted")));
-        }
-        if method.is_none() { return; }
-        let fxn = unsafe {
-            std::mem::transmute::<_, extern "C" fn(&Self, &MethodInfo) -> ()> (
-                method.unwrap().method_ptr,
-            )
-        };
-        fxn(self, method.unwrap());
-    }
-    fn on_completed_end(&self) {
-        let mut method = Self::class().get_methods().iter().find(|method| method.get_name() == Some(String::from("OnCompletedEnd")));
-        if method.is_none() {
-            method = Self::class()._1.parent.get_methods().iter().find(|method| method.get_name() == Some(String::from("OnCompletedEnd")));
-        }
-        if method.is_none() { return; }
-        let fxn = unsafe {
-            std::mem::transmute::<_, extern "C" fn(&Self, &MethodInfo) -> ()> (
-                method.unwrap().method_ptr,
-            )
-        };
-        fxn(self, method.unwrap());
-    }
-
-     */
+    #[unity::class_method(17, StructDataArray)] fn get_count() -> i32;
+    #[unity::class_method(18, StructDataArray)] fn get_list() -> Option<&'static StructArrayList<Self>>;
+    #[unity::class_method(18, StructDataArray)] fn get_list_mut() -> Option<&'static mut StructArrayList<Self>>;
 }
 

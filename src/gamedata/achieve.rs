@@ -2,7 +2,7 @@ use num_derive::FromPrimitive;
 use unity::prelude::*;
 use unity::system::List;
 use crate::gamedata::person::PersonData;
-use super::{ChapterData, Gamedata, GodData, StructBaseFields, StructDataFields};
+use super::{ChapterData, Gamedata, GodData, StructBaseFields};
 
 #[repr(i32)]
 #[derive(PartialOrd, PartialEq, Eq, Clone, Copy, FromPrimitive, Ord)]

@@ -1,10 +1,12 @@
-use unity::engine::Color;
 pub use super::*;
 
 pub mod tag;
 pub use tag::*;
 use crate::combat::Character;
+use crate::gamedata::assettable::AssetTableResult;
+use crate::god::GodUnit;
 use crate::proc::ProcInst;
+use crate::unit::Unit;
 use crate::unityengine::GameObject;
 use crate::util::get_singleton_proc_instance;
 #[unity::class("App", "Talk")] pub struct Talk {}
@@ -12,6 +14,8 @@ use crate::util::get_singleton_proc_instance;
 impl Talk {
     #[unity::class_method(7)] pub fn get_playing_mid() -> &'static Il2CppString; // Offset: 0x20B8E10 Flags: 0
 }
+
+
 
 #[unity::class("App.Talk3D", "TalkSequence")]
 pub struct TalkSequence {
@@ -94,4 +98,20 @@ impl TalkSequence {
     #[unity::class_method(59)] pub fn create<B>(parent: &B) -> &'static TalkSequence where B: Bindable; // Offset: 0x20B8360 Flags: 0
 
      */
+}
+
+#[unity::class("App.Talk3D", "CharacterFactoryAsync")]
+pub struct CharacterFactoryAsync { }
+
+impl CharacterFactoryAsync {
+    #[unity::class_method(0)] pub fn create_for_talk_pid(pid: &Il2CppString, pid_for_create: &Il2CppString, locator: &GameObject, use_talk_controller: bool) -> &'static mut Character; // Offset: 0x27DD650 Flags: 0
+    #[unity::class_method(1)] pub fn create_for_talk_unit(unit: &Unit, locator: &GameObject, use_talk_controller: bool) -> &'static mut Character; // Offset: 0x27DDB20 Flags: 0
+    #[unity::class_method(2)] pub fn create_for_talk_god(god_unit: &GodUnit, locator: &GameObject, use_talk_controller: bool) -> &'static mut Character; // Offset: 0x27DDD70 Flags: 0
+    #[unity::class_method(3)] pub fn create_for_info_unit(unit: &Unit, locator: &GameObject) -> &'static mut Character;  // Offset: 0x27DDE40 Flags: 0
+    #[unity::class_method(4)] pub fn create_for_info_god(god: &GodUnit, locator: &GameObject) -> &'static mut Character;  // Offset: 0x27DDEA0 Flags: 0
+    #[unity::class_method(5)] pub fn create_for_unit_hub(unit: &Unit, locator: &GameObject) -> &'static mut Character;  // Offset: 0x27DDFD0 Flags: 0
+    #[unity::class_method(7)] pub fn create_for_ring_cleaning(unit: &Unit, locator: &GameObject) -> &'static mut Character;  // Offset: 0x27DE080 Flags: 0
+    #[unity::class_method(8)] pub fn create_for_ring_cleaning2(god_unit: &GodUnit, locator: &GameObject) -> &'static mut Character;  // Offset: 0x27DE0E0 Flags: 0
+    #[unity::class_method(9)]
+    pub fn create_common(result: &AssetTableResult, pid: &Il2CppString, locator: &GameObject, use_talk_controller: bool, invisible: bool, is_engage: bool) -> &'static mut Character; // Offset: 0x27DD7B0 Flags: 0
 }

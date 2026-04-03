@@ -1,9 +1,8 @@
-use unity::engine::MonoBehaviorFields;
 use unity::prelude::*;
 use unity::system::List;
 use crate::menu::MenuContent;
 use crate::proc::{Bindable, ProcInstFields};
-use crate::unityengine::{GameObject, UnityComponent};
+use crate::unityengine::{MonoBehaviorFields, GameObject, UnityComponent};
 
 #[unity::class("", "ConfigRoot")]
 pub struct ConfigRoot {

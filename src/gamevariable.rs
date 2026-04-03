@@ -1,7 +1,7 @@
 //! Methods to interact with the savedata variables.
 
 use unity::prelude::*;
-use unity::system::{Dictionary, List};
+use unity::system::List;
 use crate::gameuserdata::*;
 
 #[repr(C)]

@@ -1,6 +1,5 @@
-use unity::engine::MonoBehaviorFields;
 use crate::unit::Unit;
-use crate::unityengine::GameObject;
+use crate::unityengine::{MonoBehaviorFields, GameObject};
 
 #[unity::class("App", "UnitSelectRoot")]
 pub struct UnitSelectRoot {

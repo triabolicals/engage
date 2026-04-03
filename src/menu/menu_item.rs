@@ -1,4 +1,3 @@
-pub mod shopunitselect;
 pub mod accessory;
 pub mod config;
 pub mod skill_inheritance;
@@ -161,6 +160,9 @@ pub trait BasicMenuItemMethods {
 
     extern "C" fn build_attributes(_this: &mut BasicMenuItem, _method_info: OptionalMethod) -> BasicMenuItemAttribute {
         BasicMenuItemAttribute::Enable
+    }
+    extern "C" fn custom_call(_this: &'static mut BasicMenuItem, _method_info: OptionalMethod) -> BasicMenuResult {
+        BasicMenuResult::new()
     }
 }
 

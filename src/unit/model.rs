@@ -6,11 +6,11 @@ use crate::gamedata::assettable::{AssetTableResult, AssetTableSound};
 use crate::gamedata::item::ItemData;
 use crate::resourcemanager::TResourceHandle;
 use super::*;
-use crate::unityengine::{Animator, GameObject, SkinnedMeshRenderer, Transform, UnityComponent, UnityObject};
+use crate::unityengine::{MonoBehaviorFields, Animator, GameObject, SkinnedMeshRenderer, Transform, UnityComponent, UnityObject};
 
 #[unity::class("App", "UnitActor")]
 pub struct UnitActor {
-    parent: unity::engine::MonoBehaviorFields,
+    parent: MonoBehaviorFields,
     pub obj: &'static GameObject,
     pub unit_model: &'static UnitModel,
     pub god_model: Option<&'static UnitModel>,
@@ -18,7 +18,7 @@ pub struct UnitActor {
 
 #[unity::class("App", "UnitModel")]
 pub struct UnitModel {
-    parent: unity::engine::MonoBehaviorFields,
+    parent: MonoBehaviorFields,
     unit: &'static Unit, // Offset 0x18, Attr: 1
     god_unit: &'static GodUnit, // Offset 0x20, Attr: 1
     m_handle_a: u64, // Offset 0x28, Attr: 1
@@ -106,8 +106,6 @@ pub struct UnitModelResourceHandle {
     pub right_hand_prefab: &ResourceGameObject, // Offset 0x30, Attr: 6
     pub body_anim: &ResourceAnimatorController, // Offset 0x38, Attr: 6
     pub ride_anim: &ResourceAnimatorController, // Offset 0x40, Attr: 6
-
-
      */
     junk: [u8; 0x30],
     pub acc_prefabs: &'static mut List<TResourceHandle>, // Offset 0x48, Attr: 6

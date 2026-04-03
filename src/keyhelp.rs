@@ -1,9 +1,8 @@
-use unity::engine::MonoBehaviorFields;
 use unity::prelude::*;
 use unity::system::List;
 use crate::gamedata::GamedataArray;
 use crate::titlebar::KeyHelpButton;
-use crate::unityengine::{GameObject, UnityComponent, UnityObject};
+use crate::unityengine::{MonoBehaviorFields, GameObject, UnityComponent, UnityObject};
 use crate::util::get_instance;
 
 #[repr(i32)]

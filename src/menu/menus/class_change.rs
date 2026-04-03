@@ -1,5 +1,5 @@
 use num_derive::FromPrimitive;
-use unity::engine::{Color, MonoBehaviorFields};
+use unity::engine::Color;
 use unity::engine::ui::Image;
 use unity::prelude::*;
 use unity::system::List;
@@ -11,7 +11,7 @@ use crate::tmpro::TextMeshProUGUI;
 use crate::unit::Unit;
 use crate::uniticon::UnitIcon;
 use crate::unitinfo::UnitStatusSetter;
-use crate::unityengine::{GameObject, UnityComponent};
+use crate::unityengine::{MonoBehaviorFields, GameObject, UnityComponent};
 
 #[unity::class("App", "ClassChange")]
 pub struct ClassChange{}

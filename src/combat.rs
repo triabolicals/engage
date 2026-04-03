@@ -1,20 +1,19 @@
 //! Types and methods to query the state of [`Unit`](crate::gamedata::unit::Unit)s in battle.
-
-mod character;
-
 use bitflags::bitflags;
 use unity::il2cpp::object::Array;
 use unity::prelude::*;
-use unity::system::{List, ListFields};
+use unity::system::ListFields;
 use unity::system::action::Action;
 use crate::battle::{BattleCalculator, BattleSideType};
 use crate::force::Force;
-use crate::unityengine::{GameObject, Transform, UnityComponent, UnityObject};
-
-pub use character::*;
+use crate::unityengine::{Transform, UnityComponent, UnityObject};
 use crate::gamedata::job::JobData;
 use crate::gamedata::person::PersonData;
 use crate::unit::{Unit, UnitItem};
+
+mod character;
+pub use character::*;
+
 #[unity::class("Combat", "Kaneko")] pub struct Kaneko { }
 
 impl Kaneko {
@@ -70,10 +69,6 @@ pub struct Character {
 }
 
 impl Character {
-    // pub fn get_phase(&self) -> &Phase { unsafe { character_get_phase(self, None) } }
-    // pub fn get_game_status(&self) -> &'static mut CharacterGameStatus { unsafe { character_get_status(self, None) } }
-    // pub fn get_builder(&self) -> &'static mut CharacterBuilder { unsafe { character_get_builder(self, None) } }
-    // pub fn call_on_setup_done(&self, action: &Action) { unsafe { character_call_on_setup_done(self, action, None) }; }
     #[unity::class_method(0)] pub fn get_side(&self) -> i32; // Offset: 0x2AFC5A0 Flags: 0
 
     #[unity::class_method(18)] pub fn get_phase(&self) -> &'static Phase; // Offset: 0x2AFCB70 Flags: 0
@@ -89,25 +84,6 @@ impl Character {
 impl UnityComponent for Character {}
 impl UnityObject for Character {}
 
-// Combat.Character$$get_Side	7102afc5a0	int32_t Combat.Character$$get_Side(Combat_Character_o * __this, MethodInfo * method)	8
-/*
-#[unity::from_offset("Combat", "Character", "get_Side")]
-pub fn character_get_side(this: &Character, method_info: OptionalMethod) -> i32;
-
-#[unity::from_offset("Combat", "Character", "get_GameStatus")]
-pub fn character_get_status(this: &Character, method_info: OptionalMethod) -> &'static mut CharacterGameStatus;
-
-#[unity::from_offset("Combat", "Character", "get_Builder")]
-fn character_get_builder(this: &Character, method_info: OptionalMethod) -> &'static mut CharacterBuilder;
-
-#[unity::from_offset("Combat", "CharacterAssetForm", "Build")]
-fn character_builder_build_hierarchy(this: &CharacterBuilder, appearance: Option<&CharacterAppearance>, invisble: bool, method_info: OptionalMethod);
-#[skyline::from_offset(0x2afe8e0)]
-fn character_call_on_setup_done(this: &Character, action: &Action, method_info: OptionalMethod);
-
-#[skyline::from_offset(0x2c46490)]
-fn character_builder_get_object(this: &CharacterBuilder, optional_method: OptionalMethod) -> &'static GameObject;
-*/
 
 #[unity::class("Combat", "CharacterSound")]
 pub struct CharacterSound { }
@@ -195,7 +171,6 @@ impl CharacterGameStatus {
     #[unity::class_method(4)] pub fn set_emblem_identifier(&self, value: &Il2CppString); // Offset: 0x27DEF80 Flags: 0
     #[unity::class_method(6)] pub fn get_unit(&self) -> Option<&'static mut Unit>; // Offset: 0x27DEFA0 Flags: 0
     #[unity::class_method(63)] pub fn import(&self, side_: i32, calc: &BattleCalculator, side_type: BattleSideType, map_distance: i32); // Offset: 0x27E0880 Flags: 0
-    // pub fn import(&self, side: i32, calc: &BattleCalculator, side_type: i32, map_distance: i32) { unsafe { combat_character_game_status_import(self, side, calc, side_type, map_distance, None); } }
 }
 #[unity::class("Combat", "SkillStack")]
 pub struct SkillStack {}
@@ -234,7 +209,6 @@ impl CombatRecord {
     #[unity::class_method(11)] pub fn get_game_status_chain_atk(&self) -> &'static mut Array<&'static mut CharacterGameStatus>; // Offset: 0x2922C70 Flags: 0
     #[unity::class_method(13)] pub fn get_game_status_dragonize(&self) -> &'static mut Array<&'static mut CharacterGameStatus>; // Offset: 0x2922C90 Flags: 0
     #[unity::class_method(50)] pub fn import_from_game(&self, calc: &BattleCalculator, sim_calc: &BattleCalculator); // Offset: 0x2925900 Flags: 0
-    // pub fn get_calculator(&self) -> &'static mut BattleCalculator { unsafe { combatrecord_get_calculator(self, None) }
 }
 
 
@@ -310,6 +284,7 @@ impl AnimAsset {
         asset
     }
 }
+
 #[unity::class("Combat", "Side")]
 pub struct CombatSide {}
 impl CombatSide {
@@ -422,14 +397,3 @@ pub fn side_is_chain_atk(i: i32, method_info: OptionalMethod) -> bool;
 
 #[skyline::from_offset(0x2940b90)]
 fn combat_skill_stack_has(ss: &SkillStack, name: &Il2CppString, optional_method: OptionalMethod) -> bool;
-
-/*
-#[skyline::from_offset(0x027e0880)]
-fn combat_character_game_status_import(this:&CharacterGameStatus, side: i32, calc: &BattleCalculator, side_type: i32, distance: i32, method_info: OptionalMethod);
-
-
-
-#[unity::from_offset("Combat", "CombatRecord", "get_Calculator")]
-fn combatrecord_get_calculator(this: &CombatRecord, method_info: OptionalMethod) -> &'static mut BattleCalculator;
-
- */

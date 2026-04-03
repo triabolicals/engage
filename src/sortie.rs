@@ -4,7 +4,7 @@ use crate::menu::menus::unit_select::UnitSelectRoot;
 use crate::proc::SingletonProcInstFields;
 use crate::unit::Unit;
 use crate::unityengine::GameObject;
-use crate::util::{get_instance, get_singleton_proc_instance, try_get_instance};
+use crate::util::{get_instance, get_singleton_proc_instance};
 
 #[unity::class("App", "SortieSelectionUnitManager")]
 pub struct SortieSelectionUnitManager {

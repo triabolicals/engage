@@ -1,5 +1,4 @@
 use unity::prelude::*;
-use unity::system::action::Action;
 use super::{BasicDialogItem, BasicDialogItemFields, DialogMenuItem};
 use crate::{mess::Mess, menu::BasicMenuResult, proc::Bindable};
 

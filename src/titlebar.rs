@@ -1,12 +1,10 @@
 //! Wrappers to open and close a TitleBar when entering a menu.
 
-use unity::engine::MonoBehaviorFields;
 use unity::il2cpp::object::Array;
 use unity::system::List;
-use crate::unityengine::{Animator, GameObject, UnityComponent, UnityObject};
+use crate::unityengine::{MonoBehaviorFields, Animator, GameObject, UnityComponent};
 use unity::prelude::*;
 use crate::tmpro::TextMeshProUGUI;
-use crate::util::get_instance;
 use crate::keyhelp::KeyHelpTitleBarController;
 
 #[repr(i32)]
@@ -160,38 +158,9 @@ impl TitleBar {
     #[unity::class_method(21)] pub fn update_footer_values_(&self); // Offset: 0x21EF170 Flags: 0
     #[unity::class_method(22)] pub fn set_unit_num(&self, num: i32, max_num: i32); // Offset: 0x21EE3E0 Flags: 0
     #[unity::class_method(23)] pub fn transit_header(&self, title: &Il2CppString, title_help: &Il2CppString, key_help_id: &Il2CppString); // Offset: 0x21EDAD0 Flags: 0
-
     #[unity::class_method(28)] pub fn set_title(&self, title: &Il2CppString, title_help: &Il2CppString, key_help_id: &Il2CppString); // Offset: 0x21EE0C0 Flags: 0
-
     #[unity::class_method(35)] pub fn init_footer_value(&self, values: &TitleBarValues); // Offset: 0x21EE780 Flags: 0
     #[unity::class_method(36)] pub fn set_footer_value(&self); // Offset: 0x21ED700 Flags: 0
     #[unity::class_method(37)] pub fn set_footer_count_value(&self); // Offset: 0x21EF690 Flags: 0
     #[unity::class_method(39)] pub fn set_material_value(&self, values: &TitleBarValues, index: i32, value: i32); // Offset: 0x21F0980 Flags: 0
-
 }
-
-
-/*
-#[unity::from_offset("App", "TitleBar", "OpenHeader")]
-fn titlebar_open_header(
-    this: &'static TitleBar,
-    title: &'static Il2CppString,
-    help: &'static Il2CppString,
-    key_help_id: &'static Il2CppString,
-    method_info: OptionalMethod,
-) -> bool;
-
-
-#[unity::from_offset("App", "TitleBar", "HideFooter")]
-fn titlebar_hide_footer(this: &'static TitleBar, method_info: OptionalMethod);
-
-#[unity::from_offset("App", "TitleBar", "ShowFooter")]
-fn titlebar_show_footer(this: &'static TitleBar, method_info: OptionalMethod);
-
-#[unity::from_offset("App", "TitleBar", "OpenFooter")]
-fn titlebar_open_footer(this: &'static TitleBar, ty: TitleBarFooterType, method_info: OptionalMethod);
-
-#[skyline::from_offset(0x21ef170)]
-fn titlebar_update_footer(this: &TitleBar,  method_info: OptionalMethod);
-
- */

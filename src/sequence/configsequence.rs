@@ -1,5 +1,4 @@
 use unity::prelude::*;
-use super::*;
 use crate::proc::{ProcInstFields, Bindable};
 
 #[unity::class("", "ConfigSequence")]

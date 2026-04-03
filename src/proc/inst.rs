@@ -54,9 +54,6 @@ impl ProcInst {
     pub fn cast_mut<T: AsMut<ProcInstFields>>(&mut self) -> &mut T {
         unsafe { std::mem::transmute::<&mut ProcInst, &mut T>(self) }
     }
-    fn cast2<T: Bindable>(&self) -> &'static T { unsafe { std::mem::transmute::<&Self, &T>(self) } }
-    fn cast2_mut<T: Bindable>(&mut self) -> &mut T { unsafe { std::mem::transmute::<&mut Self, &mut T>(self) } }
-
     pub fn jump<T: Bindable + ?Sized>(proc: &T, label: i32) {
         unsafe { procinst_jump(proc, label, None) }
     }

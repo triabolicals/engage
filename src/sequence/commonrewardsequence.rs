@@ -2,7 +2,6 @@ use unity::{
     prelude::*,
     system::{Dictionary, List},
 };
-use super::*;
 use crate::proc::{ProcInstFields, Bindable};
 use crate::gamedata::item::ItemData;
 use crate::unit::Unit;

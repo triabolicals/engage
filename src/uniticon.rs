@@ -1,4 +1,4 @@
-use unity::{prelude::*, engine::{ui::{IsImage, ImageFields}, Material, Sprite}};
+use unity::{prelude::*, engine::{ui::{IsImage}, Material, Sprite}};
 
 #[unity::class("App", "UnitIcon")]
 pub struct UnitIcon {

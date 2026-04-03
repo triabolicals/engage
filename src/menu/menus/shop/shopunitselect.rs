@@ -1,14 +1,12 @@
 use unity::engine::Color;
-use unity::engine::ui::Image;
 use unity::prelude::Il2CppString;
 use unity::system::List;
-use crate::{impl_action_handlers, impl_menu_class};
+use crate::impl_action_handlers;
 use crate::menu::*;
 use crate::menu::content::BasicMenuContent;
 use crate::menu::content::common::UnitMenuItemSetter;
 use crate::menu::menu_item::{MenuItem, MenuItemContent};
 use crate::proc::ProcInstFields;
-use crate::tmpro::TextMeshProUGUI;
 use crate::unit::Unit;
 use crate::unityengine::GameObject;
 
@@ -36,7 +34,7 @@ pub struct ShopUnitSelectMenu {
     pub game_object: &'static GameObject,
     pub show_god_ring_icon: bool,
 }
-impl_menu_class!(ShopUnitSelectMenu);
+impl Bindable for ShopUnitSelectMenu {}
 
 impl_action_handlers!([ShopUnitSelectMenu, "SelectEventHandler", ShopUnitSelectMenuSelectHandler], unit: &Unit);
 impl_action_handlers!([ShopUnitSelectMenu, "DecideEventHandler", ShopUnitSelectMenuDecideHandler], result: i32, unit: &Unit, scroll_index: i32);

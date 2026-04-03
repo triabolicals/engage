@@ -279,21 +279,3 @@ pub enum BasicMenuItemAttribute {
     Blank = 8,
     Select = 16,
 }
-
-#[macro_export]
-macro_rules! impl_menu_class {
-    ($name:ty) => {
-        impl crate::menu::BasicMenuMethods for $name {}
-        impl crate::proc::Bindable for $name {}
-        impl AsRef<crate::proc::inst::ProcInstFields> for $name {
-            fn as_ref(&self) -> &crate::proc::inst::ProcInstFields {
-                &self.proc
-            }
-        }
-        impl AsMut<crate::proc::inst::ProcInstFields> for $name {
-            fn as_mut(&mut self) -> &mut crate::proc::inst::ProcInstFields {
-                &mut self.proc
-            }
-        }
-    };
-}

@@ -12,8 +12,8 @@ pub struct UnitPool {}
 
 #[repr(C)]
 pub struct UnitPoolStaticFields {
-    pub s_unit: &'static Array<&'static mut Unit>,
-    pub forces: &'static Array<&'static mut Force>,
+    pub s_unit: &'static mut Array<&'static mut Unit>,
+    pub forces: &'static mut Array<&'static mut Force>,
 }
 
 #[unity::class("App", "UnitFor")]
@@ -28,6 +28,7 @@ impl UnitFor {
 
 
 impl UnitPool {
+    pub fn get_sf() -> &'static mut UnitPoolStaticFields { UnitPool::class().get_static_fields_mut::<UnitPoolStaticFields>() }
     #[unity::class_method(2)] pub fn get_count(force_mask: i32) -> i32; // Offset: 0x1C53BA0 Flags: 0
     #[unity::class_method(3)] pub fn get(index: i32) -> Option<&'static mut Unit>; // Offset: 0x1C53F80 Flags: 0
     #[unity::class_method(5)] pub fn get_first(force_mask: u32, start_force_index: i32) -> Option<&'static mut Unit>; // Offset: 0x1C54090 Flags: 0

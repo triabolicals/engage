@@ -172,6 +172,7 @@ impl GameUserData {
     #[unity::class_method(145)] pub fn on_serialize(&self, stream: &Stream); // Offset: 0x2517840 Flags: 0
     #[unity::class_method(146)] pub fn on_deserialize(&self, stream: &Stream, version: i32); // Offset: 0x2518170 Flags: 0
     #[unity::class_method(80)] pub fn cleanup_for_chapter_(&self); // Offset: 0x2512DE0 Flags: 0
+    #[unity::class_method(89)] pub fn completed_chapter(&self); // Offset: 0x2513620 Flags: 0
 }
 
 

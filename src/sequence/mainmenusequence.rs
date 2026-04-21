@@ -49,6 +49,10 @@ pub struct MainMenuSequence {
     pub prev_sequence: i32,
     pub now_sequence: i32,
     pub next_sequence: i32,
+    char_work_male: u64,
+    char_work_female: u64,
+    camera_work: u64,
+    pub history_info: &'static MainMenuSequenceHistoryInfo,
 }
 
 impl MainMenuSequence {
@@ -79,3 +83,10 @@ impl Bindable for MainMenuSequence {}
 
 #[unity::from_offset("App", "MainMenuSequence", "JumpToNextSequence")]
 fn mainmenusequence_jumptonextsequence(this: &MainMenuSequence, method_info: OptionalMethod);
+
+#[unity::class("", "HistoryInfo")]
+#[nested_from_type(MainMenuSequence)]
+pub struct MainMenuSequenceHistoryInfo {}
+impl MainMenuSequenceHistoryInfo {
+    #[unity::class_method(9)] pub fn set_history_text(&self, info_kind: i32, text: &Il2CppString); // Offset: 0x24A9460 Flags: 0
+}

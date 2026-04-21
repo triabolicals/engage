@@ -80,8 +80,11 @@ pub trait BasicMenuMethods: Il2CppClassData {
     #[unity::class_method(7,  BasicMenuClass)] fn set_active(&self, active: bool); // Offset: 0x245C3D0 Flags: 0
     #[unity::class_method(8,  BasicMenuClass)] fn set_active_all(&self, active: bool); // Offset: 0x245C480 Flags: 0
     #[unity::class_method(28, BasicMenuClass)] fn set_show_row_num(&self, row_num: i32); // Offset: 0x245CD60 Flags: 0
+    #[unity::class_method(22, BasicMenuClass)] fn get_item(&self, item_index: i32) -> Option<&'static mut BasicMenuItem>;
     #[unity::class_method(42, BasicMenuClass)] fn save_select(&self, sel: &BasicMenuSelect); // Offset: 0x245D070 Flags: 0
     #[unity::class_method(43, BasicMenuClass)] fn restore_select(&self, sel: &BasicMenuSelect); // Offset: 0x245D0A0 Flags: 0
+    #[unity::class_method(62, BasicMenuClass)] fn scroll_instant(&self); // Offset: 0x245C330 Flags: 0
+    #[unity::class_method(32, BasicMenuClass)] fn get_select_index(&self) -> i32; // Offset: 0x245CE70 Flags: 0
     #[unity::class_method(86, BasicMenuClass)] fn set_transform_as_sub_menu<M>(&self, parent_menu: &M, parent_menu_item: &BasicMenuItem) where M: BasicMenuMethods; // Offset: 0x245E330 Flags: 0
     #[unity::class_method(92, BasicMenuClass)] fn rebuild(&self); // Offset: 0x245E7E0 Flags: 0
     #[unity::class_method(93, BasicMenuClass)] fn rebuild_instant(&self, is_keep_item_index: bool); // Offset: 0x245E840 Flags: 0

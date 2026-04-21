@@ -6,7 +6,7 @@ use crate::impl_action_handlers;
 use crate::menu::BasicMenu;
 use crate::menu::menu_item::{BasicMenuItemContentFields, MenuItem, MenuItemContent};
 use crate::tmpro::TextMeshProUGUI;
-use crate::unityengine::GameObject;
+use crate::unityengine::{GameObject, UnityComponent};
 
 #[unity::class("App", "AccessoryMenuItem")]
 pub struct AccessoryMenuItem {
@@ -77,7 +77,8 @@ impl AccessoryMenuItemContent {
     #[unity::class_method(1)] pub fn build_text_(&self); // Offset: 0x27B8510 Flags: 0
 }
 impl MenuItemContent<AccessoryMenuItem> for AccessoryMenuItemContent {}
-impl MenuItemContent<AccessoryEmptyMenuItem> for AccessoryMenuItemContent {}
+impl UnityComponent for AccessoryMenuItemContent {}
+// impl MenuItemContent<AccessoryEmptyMenuItem> for AccessoryMenuItemContent {}
 
 impl_action_handlers!([AccessoryMenuItem, "SelectEventHandler", AccessoryMenuItemSelectHandler], data: &AccessoryData);
 impl_action_handlers!([AccessoryMenuItem, "DecideEventHandler", AccessoryMenuItemDecideHandler], data: &AccessoryData);

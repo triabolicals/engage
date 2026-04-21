@@ -1,5 +1,5 @@
 use unity::prelude::*;
-use unity::system::action::Action;
+use unity::system::action::{Action, Action1};
 use unity::system::Dictionary;
 use crate::unityengine::{GameObject, Transform};
 
@@ -43,6 +43,22 @@ pub struct ResourceHandle {
 
 #[unity::class("App", "ResourceGameObject")]
 pub struct ResourceGameObject { }
+
+impl ResourceGameObject {
+    #[unity::class_method(0)] pub fn ctor(&self); // Offset: 0x2013AE0 Flags: 0
+    #[unity::class_method(3, TResourceHandle)] pub fn load_async(&self, path: &Il2CppString, completed: Option<&'static Action1<GameObject>>);
+    #[unity::class_method(2, TResourceHandle)] pub fn get_asset(&self) -> Option<&'static GameObject>;
+    /*
+    pub fn load_async(&self, path: &Il2CppString, completed: Option<&'static Action1<GameObject>>) {
+        let t_resource_class = get_generic_class!(TResourceHandle<GameObject>).unwrap();
+        let method = t_resource_class.get_methods()[3];
+        let fn_call = unsafe { std::mem::transmute::<_, fn(&Self, &Il2CppString, Option<&'static Action1<GameObject>>, &MethodInfo)> (method.method_ptr) };
+        fn_call(self, path, completed, method);
+    }
+    
+     */
+    #[unity::class_method(8, ResourceHandle)] pub fn release(&self); // Offset: 0x2013BF0 Flags: 0
+}
 
 #[unity::class("App", "TResourceHandle`1")]
 pub struct TResourceHandle { }

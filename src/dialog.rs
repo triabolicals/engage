@@ -117,8 +117,6 @@ impl BasicDialogItem {
     }
 }
 
-
-
 #[unity::class("App", "YesMenuItem")]
 pub struct YesMenuItem {
     pub parent: BasicMenuItemFields,

@@ -1,8 +1,8 @@
 use std::ops::{Deref, DerefMut};
 
 use unity::prelude::*;
-use unity::system::action::Action;
-use super::{proc_jump_true, proc_call, proc_end, proc_label, proc_wait_time, proc_wait_while_true, proc_wait_while_false, Bindable, Delegate, ProcBoolMethod, ProcVoidFunction, ProcVoidMethod};
+use unity::system::action::{Action, SystemDelegate};
+use super::{proc_jump_true, proc_call, proc_wait_while_true, proc_wait_while_false, Bindable, ProcBoolMethod, ProcVoidFunction, ProcVoidMethod, Proc};
 
 #[repr(i32)]
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -36,14 +36,12 @@ pub struct ProcDesc {
 }
 
 impl ProcDesc {
-    pub fn label(label: i32) -> &'static mut ProcDesc {
-        unsafe { proc_label(label, None) }
-    }
-
-    pub fn call(method: &'static mut impl Delegate) -> &'static mut ProcDesc {
+    #[unity::class_method(2, ProcDesc)] pub fn get_desc_type(&self) -> ProcDescType;
+    #[unity::class_method(3, ProcDesc)] pub fn get_label(&self) -> i32; // Offset: 0x281CD70 Flags: 0
+    pub fn label(label: i32) -> &'static mut ProcDesc { Proc::label(label) }
+    pub fn call(method: &'static mut impl SystemDelegate) -> &'static mut ProcDesc {
         unsafe { proc_call(method, None) }
     }
-
     pub fn wait_while_true<T>(method: &'static mut ProcBoolMethod<T>) -> &'static mut ProcDesc {
         unsafe { proc_wait_while_true(method, None) }
     }
@@ -65,6 +63,8 @@ impl ProcDesc {
     // }
 
     pub fn jump(to_label: i32) -> &'static mut ProcDesc {
+        Proc::jump(to_label)
+        /*
         let result = ProcDescJump::instantiate()
             .map(|desc| {
                 desc.desc.ty = ProcDescType::Jump;
@@ -72,8 +72,9 @@ impl ProcDesc {
                 desc
             }
         ).unwrap();
-
         unsafe { std::mem::transmute(result) }
+
+             */
     }
 
     pub fn yiel() -> Il2CppResult<&'static mut ProcDescYield> {
@@ -83,13 +84,8 @@ impl ProcDesc {
         })
     }
 
-    pub fn wait_time(time: f32) -> &'static mut ProcDesc {
-        unsafe { proc_wait_time(time, None) }
-    }
-
-    pub fn end() -> &'static mut ProcDesc {
-        unsafe { proc_end(None) }
-    }
+    pub fn wait_time(time: f32) -> &'static mut ProcDesc { Proc::wait_time(time) }
+    pub fn end() -> &'static mut ProcDesc { Proc::end() }
 
     pub fn cast<T: AsRef<ProcDescFields>>(&self) -> &T {
         unsafe { std::mem::transmute::<&ProcDesc, &T>(&self) }
@@ -103,29 +99,6 @@ impl ProcDesc {
         else { None }
 
     }
-    pub fn get_label(&self) -> i32 {
-        let method = self.get_class().get_virtual_method("get_Label").unwrap();
-
-        let get_label = unsafe {
-            std::mem::transmute::<_, extern "C" fn(&Self, &MethodInfo) -> i32>(
-                method.method_info.method_ptr,
-            )
-        };
-
-        get_label(self, method.method_info)
-    }
-
-    pub fn get_desc_type(&self) -> ProcDescType {
-        let method = self.get_class().get_method_from_name("get_DescType", 0).unwrap();
-
-        let get_desc_type = unsafe {
-            std::mem::transmute::<_, extern "C" fn(&Self, &MethodInfo) -> ProcDescType>(
-                method.method_ptr,
-            )
-        };
-
-        get_desc_type(self, method)
-    }  
 }
 
 #[unity::from_offset("App", "ProcDescJump", ".ctor")]
@@ -357,6 +330,11 @@ impl DerefMut for ProcDescWaitTimeFields {
 
 #[unity::class("App", "ProcDescCall")]
 pub struct ProcDescCallEdit {
-    pub ty: ProcDescType,
+    pub desc: ProcDescFields,
     pub function: &'static mut Action,
+}
+impl AsRef<ProcDescFields> for ProcDescCallEdit {
+    fn as_ref(&self) -> &ProcDescFields {
+        &self.desc
+    }
 }

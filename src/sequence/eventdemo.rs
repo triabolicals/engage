@@ -133,6 +133,7 @@ pub struct EventDemoSequenceCmdFunc {
 /// Function Keys are used in App.EventDemoSequence$$SetupCommands (0x24de270)
 /// Methods of fn(&EventDemoSequence, &CmdInfo) -> CmdResult
 impl EventDemoSequenceCmdFunc {
+    pub const CreateCharacter: &'static str = "キャラ配置";
     pub const SetBackground: &'static str = "背景";
     pub const SetSceneCamera: &'static str = "シーンカメラ";
     pub const SoundEvent: &'static str = "サウンドイベント";

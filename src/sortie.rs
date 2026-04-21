@@ -1,6 +1,6 @@
 use unity::prelude::*;
 use crate::menu::BasicMenuSelect;
-use crate::menu::menus::unit_select::UnitSelectRoot;
+use crate::menu::menus::unit_select::{UnitSelectMenu, UnitSelectRoot};
 use crate::proc::SingletonProcInstFields;
 use crate::unit::Unit;
 use crate::unityengine::GameObject;
@@ -21,6 +21,7 @@ impl SortieSelectionUnitManager {
         let instance = Self::get_instance().unwrap();
         unsafe { sortie_get_unit(instance, None) }
     }
+    #[unity::class_method(16)] pub fn set_unit(&self, value: &Unit); // Offset: 0x1FE8DC0 Flags: 0
 }
 
 #[unity::class("App", "SortieTopMenuManager")]
@@ -39,6 +40,7 @@ pub struct SortieSequenceUnitSelect {
     pub proc: SingletonProcInstFields,
     pub game_object: &'static GameObject, // Offset 0x78, Attr: 1
     pub window: &'static UnitSelectRoot, // Offset 0x80, Attr: 1
+    pub select_menu: &'static UnitSelectMenu,
     /*
     m_unit_select_menu: &BasicMenu, // Offset 0x88, Attr: 1
     m_root_animator: &Animator, // Offset 0x90, Attr: 1
@@ -62,6 +64,14 @@ impl SortieSequenceUnitSelect {
     #[unity::class_method(20)] pub fn setting_title(&self); // Offset: 0x1FFAA40 Flags: 0
     #[unity::class_method(21)] pub fn close_title(&self); // Offset: 0x1FFB590 Flags: 0
 }
+#[unity::class("App", "SortieUtil")]
+pub struct SortieUtil { }
+
+impl SortieUtil {
+    #[unity::class_method(8)] pub fn get_prev_unit_loop(unit: &Unit) -> &'static Unit; // Offset: 0x24F29D0 Flags: 0
+    #[unity::class_method(9)] pub fn get_next_unit_loop(unit: &Unit) -> &'static Unit; // Offset: 0x24F2A90 Flags: 0
+}
+
 
 #[skyline::from_offset(0x01fe8c00)]
 fn sortie_is_sortie_mode(this: &SortieSelectionUnitManager, method_info: OptionalMethod) -> bool;

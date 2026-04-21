@@ -2,6 +2,7 @@ use unity::prelude::*;
 use unity::system::List;
 use crate::gamedata::{Gamedata, god::GodData};
 use crate::god::god_unit::GodUnit;
+use crate::god::GodBondHolder;
 
 #[unity::class("App", "GodPool")]
 pub struct GodPool {
@@ -26,4 +27,13 @@ impl GodPool {
     #[unity::class_method(11)] pub fn has_armlet() -> bool; // Offset: 0x23359C0 Flags: 0
     // #[unity::class_method(12)] pub fn on_serialize(&self, stream: &Stream); // Offset: 0x2335BD0 Flags: 0
     // #[unity::class_method(13)] pub fn on_deserialize(&self, stream: &Stream, version: i32); // Offset: 0x2335C30 Flags: 0
+}
+#[unity::class("App", "GodBondHolderPool")]
+pub struct GodBondHolderPool {
+    parent: [u8; 0x10], //  SingletonClass<GodPool>
+    list: &'static List<GodBondHolder>,
+    pub sort: &'static mut List<GodBondHolder>,
+}
+impl GodBondHolderPool {
+    pub fn get_instance() -> &'static Self { crate::util::get_instance::<GodBondHolderPool>() }
 }

@@ -3,6 +3,13 @@ use num_derive::FromPrimitive;
 use unity::il2cpp::object::Array;
 use unity::prelude::*;
 
+#[unity::class("App", "CapabilityDefinition")]
+pub struct CapabilityDefinition {}
+impl CapabilityDefinition {
+    #[unity::class_method(0)] pub fn get_name(index: i32) -> &'static Il2CppString; // Offset: 0x25BCED0 Flags: 0
+    #[unity::class_method(1)] pub fn get_help(index: i32) -> &'static Il2CppString; // Offset: 0x25BCFA0 Flags: 0
+}
+
 #[repr(i32)]
 #[derive(PartialOrd, PartialEq, Eq, Clone, Copy, FromPrimitive, Ord)]
 pub enum CapabilityDefinitionType {
@@ -47,8 +54,6 @@ pub struct CapabilityFloat {
 pub struct UnitBaseCapability {
     pub data: &'static mut Array<i8>,
 }
-
-
 
 impl Deref for CapabilityFields {
     type Target = [u8];

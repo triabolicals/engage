@@ -70,7 +70,6 @@ pub struct Character {
 
 impl Character {
     #[unity::class_method(0)] pub fn get_side(&self) -> i32; // Offset: 0x2AFC5A0 Flags: 0
-
     #[unity::class_method(18)] pub fn get_phase(&self) -> &'static Phase; // Offset: 0x2AFCB70 Flags: 0
     #[unity::class_method(19)] pub fn get_game_status(&self) -> &'static mut CharacterGameStatus; // Offset: 0x2AFCCC0 Flags: 0
     #[unity::class_method(24)] pub fn set_is_visible(&self, value: bool); // Offset: 0x2AFCE80 Flags: 0

@@ -1,6 +1,7 @@
 use unity::prelude::*;
 use crate::gamedata::{terrain::TerrainData, WeaponMask, skill::SkillArray};
 use crate::unit::{CapabilityInt, Unit, UnitItem};
+use crate::bit::BitField32;
 
 #[unity::class("App", "BattleDetail")]
 pub struct BattleDetail {
@@ -51,7 +52,9 @@ pub struct BattleInfoSide {
 }
 
 #[unity::class("App", "BattleInfo")]
-pub struct BattleInfo {}
+pub struct BattleInfo {
+    pub flag: &'static BitField32,
+}
 
 impl BattleInfo {
     #[unity::class_method(53)] pub fn get_side(&self, side: BattleSideType) -> Option<&'static mut BattleInfoSide>; // Offset: 0x1E7F210 Flags: 0

@@ -1,6 +1,9 @@
 use crate::proc::{Bindable, ProcInstFields};
 use unity::{system::List, prelude::*};
+use unity::engine::Material;
+use unity::il2cpp::object::Array;
 use crate::gamedata::chapter::ChapterData;
+use crate::unityengine::{GameObject, MonoBehaviorFields, Renderer, UnityComponent, UnityObject};
 use crate::util::get_singleton_proc_instance;
 
 #[repr(C)]
@@ -38,16 +41,38 @@ impl GmapMapInfoContent {
 
 #[unity::class("App", "GmapSpot")]
 pub struct GmapSpot {
-    pub global_flag_name: &'static Il2CppString,
-    pub chapters: &'static List<ChapterData>,
+    pub global_flag_name: &'static mut Il2CppString,
+    pub chapters: &'static mut List<ChapterData>,
+    pub obj: &'static GameObject,
+    pub controller: Option<&'static GmapSpotController>,
+    pub map_object: &'static GameObject,
+    pub next_spots: &'static mut Array<Option<&'static mut GmapSpot>>,
 }
 
 impl GmapSpot {
+    #[unity::class_method(6)] pub fn ctor(&self, chapter: &ChapterData); // Offset: 0x2B44BA0 Flags: 0
     pub fn get_chapter(&self) -> &'static ChapterData { unsafe { gmapspot_get_chapter(self, None) }  }
     pub fn is_completed(&self) -> bool { unsafe { gmapspot_is_completed(self, None) }}
     #[unity::class_method(7)] pub fn get_spot_state(&self) -> GmapSpotState; // Offset: 0x2B37310 Flags: 0
     #[unity::class_method(8)] pub fn set_spot_state(&self, value: GmapSpotState); // Offset: 0x2B44CB0 Flags: 0
+    #[unity::class_method(34)] pub fn is_completed_open_cond_spot(&self) -> bool; // Offset: 0x2B465B0 Flags: 0
 }
+
+#[unity::class("App", "GmapSpotController")]
+pub struct GmapSpotController {
+    parent: MonoBehaviorFields,
+    render_stand: &'static Renderer,
+    render_stone: &'static Renderer,
+    pub materials: &'static List<Material>,
+    pub render_mesh: &'static Renderer,
+    pub spot: Option<&'static GmapSpot>,
+    pub effect: &'static GameObject,
+}
+impl GmapSpotController {
+    #[unity::class_method(5)] pub fn set_material(&self, ty: i32); // Offset: 0x2B484B0 Flags: 0
+}
+impl UnityComponent for GmapSpotController {}
+impl UnityObject for GmapSpotController {}
 
 #[repr(i32)]
 #[derive(Copy, Clone, PartialEq, Eq)]

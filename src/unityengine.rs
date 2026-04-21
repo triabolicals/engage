@@ -1,4 +1,4 @@
-use unity::engine::{Vector3, Vector2, Material};
+use unity::engine::{Vector3, Vector2, Material, Shader, Texture};
 use unity::il2cpp::object::Array;
 use unity::prelude::*;
 use unity::system::SystemType;
@@ -157,6 +157,8 @@ impl GameObject {
     fn get_components_in_children_<T>(&self, component_type: &SystemType, include_inactive: bool) -> &'static mut Array<&'static mut T> where T: UnityComponent;
     #[unity::class_method(21, generic)]
     pub fn get_components_in_children2<T>(&self, include_inactive: bool) -> &'static Array<&'static T> where T: Il2CppClassData; // Offset: -1 Flags: 1
+    #[unity::class_method(21, generic)]
+    pub fn get_components_in_children_mut<T>(&self, include_inactive: bool) -> &'static mut Array<&'static mut T> where T: Il2CppClassData; // Offset: -1 Flags: 1
     #[unity::class_method(26)]
     fn get_components_in_parent_<T>(&self, component_type: &SystemType, include_inactive: bool) -> &'static Array<&'static mut T> where T: UnityComponent;
 
@@ -185,6 +187,24 @@ impl UnityObject for Camera {}
 impl UnityComponent for Camera {}
 
 #[unity::class("UnityEngine", "Renderer")] pub struct Renderer {}
+
+pub trait UnityRenderer: Il2CppClassData + Sized {
+    #[unity::class_method(2, Renderer)] fn get_material(&self) -> &'static Material; // Offset: 0x2F881B0 Flags: 0
+    #[unity::class_method(5, Renderer)] fn get_material_array(&self) -> &'static Array<&'static Material>; // Offset: 0x2F882A0 Flags: 0
+    #[unity::class_method(6, Renderer)] fn set_material_array(&self, m: &Array<&Material>); // Offset: 0x2F882F0 Flags: 0
+    #[unity::class_method(28, Renderer)] fn get_materials(&self) -> &'static Array<&'static Material>; // Offset: 0x2F88A90 Flags: 0
+    #[unity::class_method(29, Renderer)] fn set_materials(&self, value: &Array<&'static Material>); // Offset: 0x2F88AE0 Flags: 0
+    #[unity::class_method(10, Renderer)] fn set_enabled(&self, value: bool); // Offset: 0x2F88430 Flags: 0
+    #[unity::class_method(31, Renderer)] fn set_material(&self, value: &Material); // Offset: 0x2F88B80 Flags: 0
+    #[unity::class_method(31, Renderer)] fn set_material2(&self, value: &Material2); // Offset: 0x2F88B80 Flags: 0
+    #[unity::class_method(34, Renderer)] fn get_shared_materials(&self) -> &'static Array<&'static Material>; // Offset: 0x2F88C70 Flags: 0
+    #[unity::class_method(35, Renderer)] fn set_shared_materials(&self, value: &Array<&Material>); // Offset: 0x2F88CC0 Flags: 0
+
+    #[unity::class_method(28, Renderer)] fn get_materials2(&self) -> &'static Array<&'static Material2>; // Offset: 0x2F88A90 Flags: 0
+    #[unity::class_method(29, Renderer)] fn set_materials2(&self, value: &Array<&'static Material2>); // Offset: 0x2F88AE0 Flags: 0
+
+}
+
 impl Renderer {
     pub fn get_bounds(&self) -> Bounds {
         let mut bounds = Bounds::new();
@@ -192,9 +212,9 @@ impl Renderer {
         bounds
     }
     #[unity::class_method(37)] pub fn get_bounds_injected(&self, ret: &mut Bounds); // Offset: 0x2F880B0 Flags: 0
-    #[unity::class_method(2)] pub fn get_material(&self) -> &'static Material; // Offset: 0x2F881B0 Flags: 0
 }
 impl UnityComponent for Renderer {}
+impl UnityRenderer for Renderer {}
 
 #[unity::class("UnityEngine", "Animator")] pub struct Animator {}
 #[unity::class("UnityEngine", "Component")] pub struct Component {}
@@ -203,7 +223,12 @@ impl UnityComponent for Renderer {}
 #[unity::class("UnityEngine", "RenderTexture")] pub struct RenderTexture {}
 #[unity::class("UnityEngine", "SkinnedMeshRenderer")] pub struct SkinnedMeshRenderer {}
 #[unity::class("UTJ", "SpringBone")] pub struct SpringBone{}
-#[unity::class("UTJ.Jobs", "SpringJobManager")] pub struct SpringJobManager {}
+#[unity::class("UTJ.Jobs", "SpringJobManager")]
+pub struct SpringJobManager {
+    parent: MonoBehaviorFields,
+    pub optimize_transform: bool, // Offset 0x18, Attr: 6
+    pub is_paused: bool, // Offset 0x19, Attr: 6
+}
 
 impl UnityComponent for SpringJobManager {}
 impl UnityObject for SpringJobManager {}
@@ -218,9 +243,20 @@ impl Animator {
     #[unity::class_method(14)] pub fn set_bool_(&self, name: &Il2CppString, value: bool); // Offset: 0x3EB0C70 Flags: 0
     #[unity::class_method(157)] pub fn play_(&self, state_name: &Il2CppString); // Offset: 0x3EB5770 Flags: 0
     #[unity::class_method(190)] pub fn string_to_hash_(name: &Il2CppString) -> i32; // Offset: 0x3EB4A60 Flags: 0
+    #[unity::class_method(116)] pub fn get_parameters(&self) -> &'static Array<&'static AnimatorControllerParameter>; // Offset: 0x3EB40A0 Flags: 0
+    #[unity::class_method(117)] pub fn get_parameter_count(&self) -> i32; // Offset: 0x3EB40F0 Flags: 0
 }
 impl UnityComponent for Animator {}
 impl UnityObject for Animator {}
+
+#[unity::class("UnityEngine", "AnimatorControllerParameter")]
+pub struct AnimatorControllerParameter {
+    pub m_name: &'static Il2CppString, // Offset 0x10, Attr: 3
+    pub m_type: i32, // Offset 0x18, Attr: 3
+    pub m_default_float: f32, // Offset 0x1C, Attr: 3
+    pub m_default_int: i32, // Offset 0x20, Attr: 3
+    pub m_default_bool: bool, // Offset 0x24, Attr: 3
+}
 
 pub trait UnityComponent: Il2CppClassData + Sized {
     fn get_component<T: UnityComponent>(&self) -> Option<&'static mut T> { self.get_component_(T::class().get_system_type()) }
@@ -232,7 +268,7 @@ pub trait UnityComponent: Il2CppClassData + Sized {
     }
     fn destroy_game_object(&self) { if let Some(go) = self.get_game_object() { go.destroy(); } }
     #[unity::class_method(9, Component, generic)]
-    fn get_components_in_children_gen<T>(&self, include_inactive: bool) -> &'static Array<&'static mut T> where T: Il2CppClassData;
+    fn get_components_in_children_gen<T>(&self, include_inactive: bool) -> &'static mut Array<&'static mut T> where T: Il2CppClassData;
 
     #[unity::class_method(0, Component)] fn get_transform(&self) -> &'static Transform;
     #[unity::class_method(1, Component)] fn get_game_object(&self) -> Option<&'static GameObject>;
@@ -251,7 +287,7 @@ impl Component {
 
 // Trait for both UnityEngine.Transform and UnityEngine.RectTransform
 pub trait UnityTransform: Il2CppClassData + Sized {
-    fn find<'a>(&self, name: impl Into<&'a Il2CppString>) -> Option<&'static Transform> { self.find_(name.into()) }
+    fn find<'a>(&self, name: impl Into<&'a Il2CppString>) -> Option<&'static Self> { self.find_(name.into()) }
 
     fn set_position(&self, v: Vector3<f32>) { Self::set_position_injected(self, &v) }
     fn set_rotation(&self, v: Quaternion) { Self::set_rotation_injected(self, &v) }
@@ -303,7 +339,7 @@ pub trait UnityTransform: Il2CppClassData + Sized {
     // fn set_rotation(&self, v: Vector4<f32>) { unsafe { transform_set_rotation(self, v, None) }}
     // fn get_euler_angle(&self) -> Vector3<f32> { unsafe { transform_get_euler_angles(self, None)}}
 
-    #[unity::class_method(28, Transform)] fn get_parent(&self) -> Option<&'static Transform>; // Offset: 0x37909F0 Flags: 0
+    #[unity::class_method(28, Transform)] fn get_parent(&self) -> Option<&'static Self>; // Offset: 0x37909F0 Flags: 0
     #[unity::class_method(33, Transform)] fn set_parent(&self, parent: Option<&Transform>); // Offset: 0x3790C30 Flags: 0
     #[unity::class_method(34, Transform)] fn set_parent2(&self, parent: Option<&Transform>, world_position_stays: bool); // Offset: 0x3790C90 Flags: 0
     #[unity::class_method(41, Transform)] fn translate_local(&self, x: f32, y: f32, z: f32); // Offset: 0x3791140 Flags: 0
@@ -314,9 +350,9 @@ pub trait UnityTransform: Il2CppClassData + Sized {
     #[unity::class_method(72, Transform)] fn detach_children(self); // Offset: 0x37925F0 Flags: 0
     #[unity::class_method(78, Transform)] fn find_relative_transform_with_path(transform: &Transform, path: &Il2CppString, is_active_only: bool) -> Option<&'static Transform>; // Offset: 0x37927E0 Flags: 0
 
-    #[unity::class_method(79, Transform)] fn find_(&self, n: &Il2CppString) -> Option<&'static Transform>; // Offset: 0x3792840 Flags: 0
-    #[unity::class_method(85, Transform)] fn find_child_(&self, n: &Il2CppString) -> Option<&'static Transform>; // Offset: 0x3792AD0 Flags: 0
-    #[unity::class_method(89, Transform)] fn get_child(&self, index: i32) -> Option<&'static Transform>; // Offset: 0x3792D40 Flags: 0
+    #[unity::class_method(79, Transform)] fn find_(&self, n: &Il2CppString) -> Option<&'static Self>; // Offset: 0x3792840 Flags: 0
+    #[unity::class_method(85, Transform)] fn find_child_(&self, n: &Il2CppString) -> Option<&'static Self>; // Offset: 0x3792AD0 Flags: 0
+    #[unity::class_method(89, Transform)] fn get_child(&self, index: i32) -> Option<&'static Self>; // Offset: 0x3792D40 Flags: 0
 
     #[unity::class_method(98, Transform)] fn get_position_injected(&self, ret: &mut Vector3<f32>); // Offset: 0x378F8F0 Flags: 0
     #[unity::class_method(99, Transform)] fn set_position_injected(&self, value: &Vector3<f32>); // Offset: 0x378F9A0 Flags: 0
@@ -334,10 +370,20 @@ pub trait UnityTransform: Il2CppClassData + Sized {
 impl UnityTransform for Transform {}
 impl UnityComponent for Transform {}
 impl UnityObject for Transform {}
-
+impl Transform {
+    pub fn to_rect_transform(&self) -> &'static RectTransform {
+        unsafe { std::mem::transmute(self) }
+    }
+}
 impl RectTransform {
     pub fn get_size_delta(&self) -> Vector2<f32> { unsafe { rect_transform_get_size_delta(self, None) } }
     pub fn set_size_delta(&self, v: Vector2<f32>) { unsafe { rect_transform_set_size_delta(self, v, None) } }
+    pub fn change_size(&self, x: f32, y: f32) {
+        let mut size = self.get_size_delta();
+        size.x += x;
+        size.y += y;
+        self.set_size_delta(size);
+    }
     #[unity::class_method(33)] pub fn get_anchor_min_injected(&self, ret: &mut Vector2<f32>); // Offset: 0x2F7C500 Flags: 0
     #[unity::class_method(34)] pub fn set_anchor_min_injected(&self, value: &Vector2<f32>); // Offset: 0x2F7C5B0 Flags: 0
     #[unity::class_method(35)] pub fn get_anchor_max_injected(&self, ret: &mut Vector2<f32>); // Offset: 0x2F7C660 Flags: 0
@@ -365,14 +411,7 @@ impl RenderTexture {
 impl UnityObject for RenderTexture {}
 
 impl SkinnedMeshRenderer {
-    #[unity::class_method(28, Renderer)] pub fn get_materials(&self) -> &'static Array<&'static Material>; // Offset: 0x2F88A90 Flags: 0
-    #[unity::class_method(29, Renderer)] pub fn set_materials(&self, value: &Array<&'static Material>); // Offset: 0x2F88AE0 Flags: 0
-    #[unity::class_method(2, Renderer)] pub fn get_material(&self) -> &'static Material; // Offset: 0x2F881B0 Flags: 0
-    #[unity::class_method(5, Renderer)] pub fn get_material_array(&self) -> &'static Array<&'static Material>; // Offset: 0x2F882A0 Flags: 0
-    #[unity::class_method(6, Renderer)] pub fn set_material_array(&self, m: &Array<&Material>); // Offset: 0x2F882F0 Flags: 0
-    #[unity::class_method(10, Renderer)] pub fn set_enabled(&self, value: bool); // Offset: 0x2F88430 Flags: 0
-    #[unity::class_method(34, Renderer)] pub fn get_shared_materials(&self) -> &'static Array<&'static Material>; // Offset: 0x2F88C70 Flags: 0
-    #[unity::class_method(35, Renderer)] pub fn set_shared_materials(&self, value: &Array<&Material>); // Offset: 0x2F88CC0 Flags: 0
+
     #[unity::class_method(4)] pub fn get_force_matrix_recalculation_per_render(&self) -> bool; // Offset: 0x2F93E10 Flags: 0
     #[unity::class_method(5)] pub fn set_force_matrix_recalculation_per_render(&self, value: bool); // Offset: 0x2F93E60 Flags: 0
     #[unity::class_method(6)] pub fn get_root_bone(&self) -> &'static Transform; // Offset: 0x2F93EB0 Flags: 0
@@ -384,6 +423,7 @@ impl SkinnedMeshRenderer {
 }
 impl UnityComponent for SkinnedMeshRenderer {}
 impl UnityObject for SkinnedMeshRenderer {}
+impl UnityRenderer for SkinnedMeshRenderer {}
 
 #[unity::class("UnityEngine", "Mesh")]
 pub struct Mesh {}
@@ -391,6 +431,64 @@ pub struct Mesh {}
 impl UnityComponent for SpringBone {}
 impl UnityObject for SpringBone {}
 
+// Namespace: UnityEngine, Token: 0x20000F6
+#[unity::class("UnityEngine", "ResourcesAPI")]
+pub struct ResourcesAPI { }
+
+#[unity::class("UnityEngine", "Shader")]
+pub struct Shader2 { }
+impl UnityObject for Shader2 {}
+
+impl ResourcesAPI {
+    pub fn find_all_objects_of_type<T: Il2CppClassData>() -> &'static Array<&'static T> {
+        let api = Self::get_active_api();
+        api.find_objects_of_type_all(T::class().get_system_type())
+    }
+    pub fn find_shader<'a>(name: impl Into<&'a Il2CppString>) -> Option<&'static Shader2> {
+        let api = Self::get_active_api();
+        api.find_shader_by_name(name.into())
+    }
+    pub fn find_shader2<'a>(name: &str) -> Option<&'static  &'static Shader2> {
+        Self::find_all_objects_of_type::<Shader2>().iter().find(|v| v.get_name().to_string() == name)
+    }
+    #[unity::class_method(0)]
+    pub fn get_active_api() -> &'static ResourcesAPI; // Offset: 0x2F890F0 Flags: 0
+    #[unity::class_method(1)]
+    pub fn get_override_api() -> &'static ResourcesAPI; // Offset: 0x2F89410 Flags: 0
+    #[unity::class_method(2)]
+    pub fn ctor(&self); // Offset: 0x2F89480 Flags: 0
+    #[unity::class_method(3)]
+    pub fn find_objects_of_type_all<T>(&self, system_type_instance: &SystemType) -> &'static Array<&'static T>
+    where
+        T: Il2CppClassData; // Offset: 0x2F89490 Flags: 0
+    #[unity::class_method(4)]
+    pub fn find_shader_by_name(&self, name: &Il2CppString) -> Option<&'static Shader2>; // Offset: 0x2F89530 Flags: 0
+    /*
+    #[unity::class_method(5)] pub fn load(&self, path: &Il2CppString, system_type_instance: &Type) -> &'static Object; // Offset: 0x2F895D0 Flags: 0
+    #[unity::class_method(6)] pub fn load_all(&self, path: &Il2CppString, system_type_instance: &Type) -> &'static Array<Object>; // Offset: 0x2F89670 Flags: 0
+    #[unity::class_method(7)] pub fn load_async(&self, path: &Il2CppString, system_type_instance: &Type) -> &'static ResourceRequest; // Offset: 0x2F89710 Flags: 0
+    #[unity::class_method(8)] pub fn unload_asset(&self, asset_to_unload: &Object); // Offset: 0x2F897E0 Flags: 0
+     */
+}
+#[unity::class("UnityEngine", "Material")]
+pub struct Material2 {}
+impl Material2 {
+    pub fn set_texture<'a>(&self, name: impl Into<&'a Il2CppString>, value: Option<&Texture>) {
+        self.set_texture_(name.into(), value);
+    }
+    #[unity::class_method(4)] pub fn ctor(&self, shader: &Shader2); // Offset: 0x32D90B0 Flags: 0
+    #[unity::class_method(50)] pub fn set_shader_keywords2(&self, value: &Array<&Il2CppString>); // Offset: 0x32DAC60 Flags: 0
+    #[unity::class_method(11)] pub fn set_shader(&self, value: &Shader2); // Offset: 0x32D9310 Flags: 0
+    #[unity::class_method(26)] pub fn enable_keyword(&self, keyword: &Il2CppString); // Offset: 0x32DA410 Flags: 0
+    #[unity::class_method(108)] pub fn set_texture_(&self, name: &Il2CppString, value: Option<&Texture>); // Offset: 0x32D9AA0 Flags: 0
+    #[unity::class_method(146)] pub fn get_texture(&self, name: &Il2CppString) -> Option<&'static Texture2>; // Offset: 0x32D98F0 Flags: 0
+}
+impl UnityObject for Material2 {}
+
+#[unity::class("UnityEngine", "Texture")]
+pub struct Texture2 {
+}
+impl UnityObject for Texture2 {}
 /*
 #[skyline::from_offset(0x1e2b8d0)] fn go_get_com_in_children<C: UnityComponent>(this: &GameObject, method_info: OptionalMethod) -> &'static mut Array<&'static mut C>;
 #[skyline::from_offset(0x2c4e0d0)] fn go_get_component_in_children(this: &GameObject, system_type: &SystemType, include_inactive: bool, optional_method: OptionalMethod) -> &'static Array<&'static Component>;

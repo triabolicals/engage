@@ -24,7 +24,7 @@ pub struct DisposData {
     pub level_n: u8,
     pub level_h: u8,
     pub level_l: u8,
-    __: i32,
+    pub pad: i32,
     pub items: &'static mut Array<&'static mut DisposDataItem>,
     pub item1: &'static DisposDataItem,
     pub item2: &'static DisposDataItem,

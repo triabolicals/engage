@@ -4,7 +4,7 @@ use unity::system::List;
 use crate::combat::{CharacterJoint, ProportionParameters};
 use crate::gamedata::assettable::{AssetTableResult, AssetTableSound};
 use crate::gamedata::item::ItemData;
-use crate::resourcemanager::TResourceHandle;
+use crate::resourcemanager::{ResourceGameObject, TResourceHandle};
 use super::*;
 use crate::unityengine::{MonoBehaviorFields, Animator, GameObject, SkinnedMeshRenderer, Transform, UnityComponent, UnityObject};
 
@@ -67,6 +67,16 @@ pub struct UnitModel {
     m_trans: &'static Transform, // Offset 0x190, Attr: 1
     m_sound: AssetTableSound, // Offset 0x198, Attr: 1
 }
+impl UnitModel {
+    #[unity::class_method(31)] pub fn get_folder_name(name: &Il2CppString) -> &'static Il2CppString; // Offset: 0x1FBDD00 Flags: 0
+    #[unity::class_method(32)] pub fn get_asset_path(root: &Il2CppString, name: &Il2CppString, subs: &Array<&Il2CppString>) -> &'static Il2CppString; // Offset: 0x1FBDEC0 Flags: 0
+    #[unity::class_method(33)] pub fn get_footer(name: &Il2CppString) -> &'static Il2CppString; // Offset: 0x1FBE090 Flags: 0
+    #[unity::class_method(34)] pub fn head_folder(name: &Il2CppString) -> &'static Il2CppString; // Offset: 0x1FBE110 Flags: 0
+    #[unity::class_method(35)] pub fn body_folder(name: &Il2CppString) -> &'static Il2CppString; // Offset: 0x1FBE260 Flags: 0
+    #[unity::class_method(36)] pub fn acc_folder(name: &Il2CppString) -> &'static Il2CppString; // Offset: 0x1FBE3B0 Flags: 0
+    #[unity::class_method(38)] pub fn load_async(&self, result: &AssetTableResult) -> bool; // Offset: 0x1FBE510 Flags: 0
+    #[unity::class_method(26)] pub fn get_relative_path(root: &Transform, transform: &Transform) -> &'static Il2CppString; // Offset: 0x1FBD990 Flags: 0
+}
 
 #[repr(i32)]
 #[derive(PartialEq, Clone, Copy)]
@@ -98,27 +108,19 @@ impl UnityObject for UnitActor {}
 #[unity::class("", "ResourceHandle")]
 #[nested_from_type(UnitModel)]
 pub struct UnitModelResourceHandle {
-    /*
-    pub body_prefab: &ResourceGameObject, // Offset 0x10, Attr: 6
-    pub head_prefab: &ResourceGameObject, // Offset 0x18, Attr: 6
-    pub ride_prefab: &ResourceGameObject, // Offset 0x20, Attr: 6
-    pub left_hand_prefab: &ResourceGameObject, // Offset 0x28, Attr: 6
-    pub right_hand_prefab: &ResourceGameObject, // Offset 0x30, Attr: 6
-    pub body_anim: &ResourceAnimatorController, // Offset 0x38, Attr: 6
-    pub ride_anim: &ResourceAnimatorController, // Offset 0x40, Attr: 6
-     */
-    junk: [u8; 0x30],
-    pub acc_prefabs: &'static mut List<TResourceHandle>, // Offset 0x48, Attr: 6
+    pub body_prefab: &'static ResourceGameObject, // Offset 0x10, Attr: 6
+    pub head_prefab: &'static ResourceGameObject, // Offset 0x18, Attr: 6
+    pub ride_prefab: &'static ResourceGameObject, // Offset 0x20, Attr: 6
+    pub left_hand_prefab: &'static ResourceGameObject, // Offset 0x28, Attr: 6
+    pub right_hand_prefab: &'static ResourceGameObject, // Offset 0x30, Attr: 6
+    // pub body_anim: &ResourceAnimatorController, // Offset 0x38, Attr: 6
+    // pub ride_anim: &ResourceAnimatorController, // Offset 0x40, Attr: 6
+    junk: [u8; 0x10],
+    pub acc_prefabs: &'static mut List<ResourceGameObject>, // Offset 0x48, Attr: 6
     pub acc_locators: &'static mut List<Il2CppString>, // Offset 0x50, Attr: 6
 }
 
-impl UnitModel {
-    #[unity::class_method(31)] pub fn get_folder_name(name: &Il2CppString) -> &'static Il2CppString; // Offset: 0x1FBDD00 Flags: 0
-    #[unity::class_method(32)] pub fn get_asset_path(root: &Il2CppString, name: &Il2CppString, subs: &Array<&Il2CppString>) -> &'static Il2CppString; // Offset: 0x1FBDEC0 Flags: 0
-    #[unity::class_method(33)] pub fn get_footer(name: &Il2CppString) -> &'static Il2CppString; // Offset: 0x1FBE090 Flags: 0
-    #[unity::class_method(34)] pub fn head_folder(name: &Il2CppString) -> &'static Il2CppString; // Offset: 0x1FBE110 Flags: 0
-    #[unity::class_method(35)] pub fn body_folder(name: &Il2CppString) -> &'static Il2CppString; // Offset: 0x1FBE260 Flags: 0
-    #[unity::class_method(36)] pub fn acc_folder(name: &Il2CppString) -> &'static Il2CppString; // Offset: 0x1FBE3B0 Flags: 0
-    #[unity::class_method(38)] pub fn load_async(&self, result: &AssetTableResult) -> bool; // Offset: 0x1FBE510 Flags: 0
-
+impl UnitModelResourceHandle {
+    #[unity::class_method(3)] pub fn release(&self); // Offset: 0x1B53520 Flags: 0
+// Offset: 0xFFFFFFFFFFFFFFFF Flags: 0
 }

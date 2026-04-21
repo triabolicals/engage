@@ -8,7 +8,7 @@ use crate::gamedata::item::ItemData;
 use crate::god::GodUnit;
 use crate::proc::ProcInstFields;
 use crate::unit::Unit;
-use crate::unityengine::{GameObject, RectTransform, RenderTexture, UnityComponent};
+use crate::unityengine::{Camera, GameObject, RectTransform, RenderTexture, UnityComponent};
 use crate::util::{get_singleton_proc_instance};
 
 #[unity::class("App", "UnitStatusSetter")]
@@ -62,6 +62,7 @@ impl UnitInfo {
     #[unity::class_method(54)] pub fn set_visible_side(side: UnitInfoSide, is_visible: bool); // Offset: 0x1F89400 Flags: 0
     #[unity::class_method(63)] pub fn chara_only_on(is_change_chara_model_anim: bool); // Offset: 0x1F89BD0 Flags: 0
     #[unity::class_method(64)] pub fn chara_only_off(); // Offset: 0x1F89CE0 Flags: 0
+    #[unity::class_method(41)] pub fn get_face_camera_component(side: UnitInfoSide) -> &'static Camera;
 }
 
 impl UnitStatus {
